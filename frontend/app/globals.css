@@ -1,0 +1,109 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-50: #eff6ff;
+  --color-brand-100: #dbeafe;
+  --color-brand-500: #3b82f6;
+  --color-brand-900: #1e3a8a;
+
+  /* HireShield Risk Colors */
+  --color-risk-critical: #ff2a2a;
+  --color-risk-high: #ff7326;
+  --color-risk-suspicious: #ffb703;
+  --color-risk-low: #10b981;
+  --color-risk-verified: #06b6d4;
+
+  /* Custom dark theme colors for investigation aesthetic */
+  --color-surface: #0f172a; /* slate-900 */
+  --color-surface-raised: #1e293b; /* slate-800 */
+  --color-surface-elevated: #334155; /* slate-700 */
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, monospace;
+}
+
+@layer base {
+  :root {
+    --background: #020617; /* slate-950 */
+    --foreground: #f8fafc; /* slate-50 */
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Scrollbar styling for a tech-tool feel */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-surface-elevated);
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-brand-500);
+  }
+}
+
+@layer components {
+  /* Investigation Panel */
+  .panel {
+    @apply bg-surface border border-surface-elevated rounded-lg shadow-xl shadow-black/50 overflow-hidden relative;
+  }
+  
+  .panel-header {
+    @apply px-4 py-3 border-b border-surface-elevated bg-surface-raised flex items-center justify-between text-sm font-semibold tracking-wider text-slate-300 uppercase;
+  }
+
+  .panel-body {
+    @apply p-4;
+  }
+
+  /* Technical Label */
+  .tech-label {
+    @apply text-xs font-mono text-slate-400 uppercase tracking-widest mb-1 block;
+  }
+
+  /* Technical Value */
+  .tech-value {
+    @apply text-sm font-mono text-slate-200;
+  }
+
+  /* Badge */
+  .badge {
+    @apply inline-flex items-center px-2 py-0.5 rounded text-xs font-medium font-mono uppercase tracking-wider;
+  }
+  .badge-critical {
+    @apply bg-risk-critical/10 text-risk-critical border border-risk-critical/30;
+  }
+  .badge-high {
+    @apply bg-risk-high/10 text-risk-high border border-risk-high/30;
+  }
+  .badge-suspicious {
+    @apply bg-risk-suspicious/10 text-risk-suspicious border border-risk-suspicious/30;
+  }
+  .badge-low {
+    @apply bg-risk-low/10 text-risk-low border border-risk-low/30;
+  }
+  .badge-verified {
+    @apply bg-risk-verified/10 text-risk-verified border border-risk-verified/30;
+  }
+
+  /* Ghost Button */
+  .btn-ghost {
+    @apply px-4 py-2 rounded-md font-mono text-sm tracking-wider uppercase text-slate-300 hover:text-white hover:bg-surface-raised transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-brand-500/50;
+  }
+
+  /* Primary Button */
+  .btn-primary {
+    @apply px-4 py-2 rounded-md font-mono text-sm tracking-wider uppercase bg-brand-500 text-white hover:bg-brand-500/90 shadow-[0_0_15px_rgba(59,130,246,0.3)] hover:shadow-[0_0_25px_rgba(59,130,246,0.5)] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-brand-500/50;
+  }
+}
