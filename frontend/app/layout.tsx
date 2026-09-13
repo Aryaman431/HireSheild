@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import Navigation from "@/components/Navigation";
-
-
+import { ClerkProvider } from '@clerk/nextjs'
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
@@ -25,16 +24,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${inter.variable} ${jetbrainsMono.variable} h-full antialiased dark`}
-    >
-      <body className="min-h-full flex flex-col bg-slate-950 text-slate-200 font-sans">
-        <Navigation />
-        <main className="flex-1 flex flex-col">
-          {children}
-        </main>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html
+        lang="en"
+        className={`${inter.variable} ${jetbrainsMono.variable} h-full antialiased dark`}
+      >
+        <body className="min-h-full flex flex-col bg-slate-950 text-slate-200 font-sans">
+          <Navigation />
+          <main className="flex-1 flex flex-col">
+            {children}
+          </main>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

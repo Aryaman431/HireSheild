@@ -23,6 +23,7 @@ class JobPosting(Base, TimestampMixin):
     id: Mapped[str] = mapped_column(String, primary_key=True, default=generate_uuid)
     company_id: Mapped[str | None] = mapped_column(String, ForeignKey("companies.id", ondelete="SET NULL"), index=True, nullable=True)
     recruiter_id: Mapped[str | None] = mapped_column(String, ForeignKey("recruiters.id", ondelete="SET NULL"), index=True, nullable=True)
+    user_id: Mapped[str | None] = mapped_column(String, ForeignKey("users.id", ondelete="SET NULL"), index=True, nullable=True)
     
     title: Mapped[str | None] = mapped_column(String, nullable=True)
     description: Mapped[str | None] = mapped_column(String, nullable=True)
@@ -38,6 +39,7 @@ class JobPosting(Base, TimestampMixin):
 
     company: Mapped["Company"] = relationship(back_populates="jobs")
     recruiter: Mapped["Recruiter"] = relationship(back_populates="jobs")
+    user: Mapped["User"] = relationship()
     analysis_runs: Mapped[List["AnalysisRun"]] = relationship(back_populates="job_posting", cascade="all, delete-orphan")
     risk_signals: Mapped[List["RiskSignal"]] = relationship(back_populates="job_posting", cascade="all, delete-orphan")
     reports: Mapped[List["Report"]] = relationship(back_populates="job_posting")

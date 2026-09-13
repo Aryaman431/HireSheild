@@ -1,24 +1,12 @@
-import { createClient } from '@/lib/supabase/server'
+import { currentUser } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
-import { revalidatePath } from 'next/cache'
+import { SignOutButton } from '@clerk/nextjs'
 
 export default async function DashboardPage() {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const user = await currentUser()
 
   if (!user) {
-    redirect('/login')
-  }
-
-  const signOut = async () => {
-    'use server'
-    const supabase = await createClient()
-    await supabase.auth.signOut()
-    revalidatePath('/', 'layout')
-    redirect('/login')
+    redirect('/')
   }
 
   return (
@@ -27,12 +15,12 @@ export default async function DashboardPage() {
         <header className="flex justify-between items-center border-b border-surface-elevated pb-6">
           <h1 className="text-2xl font-light tracking-wide uppercase">Command Center</h1>
           <div className="flex items-center gap-4">
-            <span className="tech-label m-0 text-brand-500">{user.email}</span>
-            <form action={signOut}>
+            <span className="tech-label m-0 text-brand-500">{user.primaryEmailAddress?.emailAddress}</span>
+            <SignOutButton>
               <button className="btn-ghost text-xs border border-risk-critical/30 text-risk-critical hover:bg-risk-critical/10">
                 TERMINATE SESSION
               </button>
-            </form>
+            </SignOutButton>
           </div>
         </header>
 

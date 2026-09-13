@@ -8,7 +8,9 @@ class Settings(BaseSettings):
     # Optional testing DB
     TEST_DATABASE_URI: str | None = None
     
-    SUPABASE_JWT_SECRET: str
+    CLERK_SECRET_KEY: str | None = None
+    CLERK_JWKS_URL: str | None = None # e.g. https://api.clerk.dev/v1/jwks
+    
     CORS_ORIGINS: str = "http://localhost:3000"
 
     # AI Configuration (Phase 6)
@@ -19,6 +21,6 @@ class Settings(BaseSettings):
     MAX_UPLOAD_SIZE_MB: int = 10
     MAX_PDF_PAGES: int = 20
 
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+    model_config = SettingsConfigDict(env_file=(".env", "../.env"), env_file_encoding="utf-8", extra="ignore")
 
 settings = Settings()

@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { auth } from "@clerk/nextjs/server"
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import ReportOpportunityForm from '@/components/ReportOpportunityForm'
@@ -6,8 +6,11 @@ import VerificationPanel from '@/components/VerificationPanel'
 import RiskVisualization from '@/components/RiskVisualization'
 import RiskSignalRow from '@/components/RiskSignalRow'
 
-async function getAnalysisResult(id: string, token: string) {
+async function getAnalysisResult(id: string, token: string | null) {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+  if (!token) {
+    return null
+  }
   const response = await fetch(`${apiUrl}/api/v1/jobs/${id}`, {
     headers: {
       'Authorization': `Bearer ${token}`
@@ -21,7 +24,7 @@ async function getAnalysisResult(id: string, token: string) {
   return response.json()
 }
 
-async function getHistoricalIntelligence(id: string, token: string) {
+async function getHistoricalIntelligence(id: string, token: string | null) {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
   const response = await fetch(`${apiUrl}/api/v1/jobs/${id}/intelligence/historical`, {
     headers: {
@@ -36,29 +39,24 @@ async function getHistoricalIntelligence(id: string, token: string) {
   return response.json()
 }
 
-export default async function Page({ params }: { params: { id: string } }) {
-  const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
-  
-  if (!session) {
-    return null
-  }
-
-  const result = await getAnalysisResult(params.id, session.access_token)
+export default async function ResultPage({ params }: { params: { id: string } }) {
+  const { userId, getToken } = await auth()
+  const token = await getToken()
+  const result = await getAnalysisResult(params.id, token)
 
   if (!result) {
     redirect('/dashboard')
   }
 
   // Fetch historical intelligence
-  const historicalData = await getHistoricalIntelligence(params.id, session.access_token)
+  const historicalData = await getHistoricalIntelligence(params.id, token)
 
 
   
   // Note: For MVP we manually filter the reports on the frontend to avoid creating a whole new endpoint just for job reports list.
 
   // I will just mock job community intelligence using `HISTORICAL_REPORTS` signal presence.
-  const commSignal = result.signals.find((s: unknown) => s.type === 'HISTORICAL_REPORTS')
+  const commSignal = result.signals.find((s: any) => s.type === 'HISTORICAL_REPORTS')
   const approvedReportsCount = commSignal ? parseInt(commSignal.reasoning.match(/\d+/)?.[0] || '0') : 0
 
 
@@ -109,7 +107,7 @@ export default async function Page({ params }: { params: { id: string } }) {
           </div>
         </div>
 
-        <VerificationPanel jobId={result.id} accessToken={session.access_token} />
+        <VerificationPanel jobId={result.id} accessToken={token || ''} />
 
         {/* Intelligence Sections */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -257,7 +255,7 @@ export default async function Page({ params }: { params: { id: string } }) {
             jobId={result.id} 
             companyId={result.company?.id} 
             recruiterId={result.recruiter?.id} 
-            accessToken={session.access_token} 
+            accessToken={token || ''} 
           />
         </div>
       </div>

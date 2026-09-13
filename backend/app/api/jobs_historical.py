@@ -6,6 +6,7 @@ from app.core.database import get_db
 from app.auth.dependencies import get_current_user
 from app.models.user import User
 from app.models.embedding import Embedding, ReferenceType
+from app.models.job_posting import JobPosting
 from app.services.historical_service import HistoricalService
 
 router = APIRouter()
@@ -19,6 +20,10 @@ async def get_historical_intelligence(
     """
     Returns historical intelligence for a specific job posting.
     """
+    job = await db.get(JobPosting, job_id)
+    if not job or job.user_id != current_user.id:
+        raise HTTPException(status_code=404, detail="Job not found")
+
     # Verify the embedding exists
     result = await db.execute(
         select(Embedding)

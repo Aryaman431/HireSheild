@@ -50,7 +50,7 @@ export default function ReportOpportunityForm({ jobId, companyId, recruiterId, a
         setErrorMsg(data.detail || 'Failed to submit report')
         setStatus('error')
       }
-    } catch (err: unknown) {
+    } catch (err: any) {
       setErrorMsg(err.message || 'Network error')
       setStatus('error')
     }

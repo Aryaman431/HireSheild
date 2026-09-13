@@ -1,4 +1,4 @@
-export default function RiskSignalRow({ signal }: { signal: unknown }) {
+export default function RiskSignalRow({ signal }: { signal: any }) {
   const isHighSeverity = signal.contribution >= 20
 
   return (

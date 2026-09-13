@@ -1,14 +1,16 @@
-import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
+import { auth } from '@clerk/nextjs/server'
+import Link from 'next/link'
 
+async function getCommunityFeed(page = 1) {
+  const { getToken } = await auth()
+  const token = await getToken()
 
-async function getCommunityFeed(token: string) {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-  const response = await fetch(`${apiUrl}/api/v1/community`, {
+  const response = await fetch(`${apiUrl}/api/v1/community?page=${page}`, {
+    cache: 'no-store',
     headers: {
-      'Authorization': `Bearer ${token}`
-    },
-    cache: 'no-store'
+      ...(token && { 'Authorization': `Bearer ${token}` })
+    }
   })
 
   if (!response.ok) {
@@ -17,15 +19,14 @@ async function getCommunityFeed(token: string) {
   return response.json()
 }
 
-export default async function CommunityPage() {
-  const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
-
-  if (!session) {
-    redirect('/auth/login')
-  }
-
-  const feed = await getCommunityFeed(session.access_token)
+export default async function CommunityPage({
+  searchParams,
+}: {
+  searchParams: { page?: string }
+}) {
+  const { userId } = await auth()
+  const page = Number(searchParams.page) || 1
+  const feed = await getCommunityFeed(page)
   
   if (!feed) {
     return (
@@ -38,9 +39,16 @@ export default async function CommunityPage() {
   return (
     <div className="flex-1 p-8">
       <div className="max-w-4xl mx-auto space-y-8">
-        <header className="border-b border-surface-elevated pb-6">
-          <h1 className="text-3xl font-light tracking-wide uppercase text-brand-100">COMMUNITY INTELLIGENCE</h1>
-          <p className="text-slate-400 font-mono text-xs mt-2">Shared threat intelligence. Identity protected.</p>
+        <header className="border-b border-surface-elevated pb-6 flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-light tracking-wide uppercase text-brand-100">COMMUNITY INTELLIGENCE</h1>
+            <p className="text-slate-400 font-mono text-xs mt-2">Shared threat intelligence. Identity protected.</p>
+          </div>
+          {!userId && (
+            <Link href="/sign-in" className="btn-primary text-xs">
+              AUTHENTICATE TO REPORT
+            </Link>
+          )}
         </header>
 
         <div className="panel p-0 border-brand-500/30">
@@ -53,7 +61,7 @@ export default async function CommunityPage() {
             <p className="text-slate-500 font-mono text-sm p-6">No community reports found.</p>
           ) : (
             <div className="flex flex-col">
-              {feed.reports.map((report: unknown, idx: number) => (
+              {feed.reports.map((report: any, idx: number) => (
                 <div 
                   key={report.id}
                   className={`p-6 flex flex-col md:flex-row gap-4 items-start md:items-center justify-between ${idx !== feed.reports.length - 1 ? 'border-b border-surface-elevated/50' : ''} hover:bg-surface-raised/50 transition-colors`}

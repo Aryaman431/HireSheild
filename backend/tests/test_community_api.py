@@ -30,6 +30,7 @@ async def test_create_and_moderate_report(async_client: AsyncClient, override_au
     assert len([r for r in feed["reports"] if r["id"] == report["id"]]) == 0
     
     # 3. Moderate Report
+    override_auth("admin_123", is_admin=True)
     mod_resp = await async_client.post(f"/api/v1/reports/{report['id']}/moderate", json={
         "status": "APPROVED"
     })
@@ -54,6 +55,7 @@ async def test_community_intelligence_privacy(async_client: AsyncClient, overrid
     report_id = create_resp.json()["id"]
     
     # Moderate
+    override_auth("admin_123", is_admin=True)
     await async_client.post(f"/api/v1/reports/{report_id}/moderate", json={"status": "APPROVED"})
     
     # Fetch details

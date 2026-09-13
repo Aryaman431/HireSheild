@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { useAuth } from '@clerk/nextjs'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 
@@ -12,24 +12,22 @@ export default function ReportDetailPage() {
   const [report, setReport] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [confirming, setConfirming] = useState(false)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [session, setSession] = useState<any>(null)
+  const { getToken, isLoaded, isSignedIn } = useAuth()
 
   useEffect(() => {
     async function load() {
-      const supabase = createClient()
-      const { data: { session: sess } } = await supabase.auth.getSession()
+      if (!isLoaded) return
       
-      if (!sess) {
-        router.push('/auth/login')
+      if (!isSignedIn) {
+        router.push('/sign-in')
         return
       }
-      setSession(sess)
 
+      const token = await getToken()
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
       const response = await fetch(`${apiUrl}/api/v1/community/reports/${params.id}`, {
         headers: {
-          'Authorization': `Bearer ${sess.access_token}`
+          ...(token && { 'Authorization': `Bearer ${token}` })
         }
       })
 
@@ -40,16 +38,17 @@ export default function ReportDetailPage() {
       setLoading(false)
     }
     load()
-  }, [params.id, router])
+  }, [params.id, router, isLoaded, isSignedIn, getToken])
 
   const handleConfirm = async (responseType: 'HAPPENED_TO_ME' | 'DID_NOT_HAPPEN_TO_ME') => {
-    if (!session) return
+    if (!isSignedIn) return
     setConfirming(true)
+    const token = await getToken()
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
     const res = await fetch(`${apiUrl}/api/v1/community/reports/${params.id}/confirm`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${session.access_token}`,
+        ...(token && { 'Authorization': `Bearer ${token}` }),
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({ response: responseType })
@@ -58,7 +57,9 @@ export default function ReportDetailPage() {
     if (res.ok) {
       // Refresh
       const detailRes = await fetch(`${apiUrl}/api/v1/community/reports/${params.id}`, {
-        headers: { 'Authorization': `Bearer ${session.access_token}` }
+        headers: { 
+          ...(token && { 'Authorization': `Bearer ${token}` })
+        }
       })
       if (detailRes.ok) {
         setReport(await detailRes.json())

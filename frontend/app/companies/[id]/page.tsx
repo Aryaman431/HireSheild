@@ -1,20 +1,21 @@
-import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { auth } from '@clerk/nextjs/server'
 import RiskVisualization from '@/components/RiskVisualization'
 
 async function getCompanyIntelligence(id: string) {
-  const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
+  const { userId, getToken } = await auth()
   
-  if (!session) {
+  if (!userId) {
     return null
   }
+
+  const token = await getToken()
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
   const response = await fetch(`${apiUrl}/api/v1/companies/${id}/intelligence`, {
     headers: {
-      'Authorization': `Bearer ${session.access_token}`
+      ...(token && { 'Authorization': `Bearer ${token}` })
     }
   })
 
@@ -22,7 +23,7 @@ async function getCompanyIntelligence(id: string) {
     return null
   }
   
-  const communityRes = await fetch(`${apiUrl}/api/v1/community?limit=100`, { headers: { 'Authorization': `Bearer ${session.access_token}` } })
+  const communityRes = await fetch(`${apiUrl}/api/v1/community?limit=100`, { headers: { ...(token && { 'Authorization': `Bearer ${token}` }) } })
   const allCommunity = communityRes.ok ? await communityRes.json() : null
   
   return {
@@ -40,7 +41,7 @@ export default async function CompanyDossierPage({ params }: { params: { id: str
 
   const { company, risk, verification, related_jobs, associated_recruiters, community_feed } = data
   
-  const communityReportsCount = community_feed?.reports?.filter((r: unknown) => r.company_name === company.name).length || 0
+  const communityReportsCount = community_feed?.reports?.filter((r: any) => r.company_name === company.name).length || 0
 
 
 
@@ -103,7 +104,7 @@ export default async function CompanyDossierPage({ params }: { params: { id: str
             <p className="text-slate-400 font-mono text-sm p-6">No verification checks found.</p>
           ) : (
             <ul className="space-y-3 px-6 pb-6">
-              {verification.checks?.map((c: unknown) => (
+              {verification.checks?.map((c: any) => (
                 <li key={c.id} className="text-sm font-mono flex items-start gap-4 p-3 bg-surface border border-surface-elevated rounded">
                   <span className={`badge ${c.result === 'VERIFIED' ? 'badge-verified' : c.result === 'SUSPICIOUS' ? 'badge-critical' : 'badge-suspicious'}`}>{getResultIcon(c.result)}</span>
                   <div>

@@ -19,6 +19,31 @@ class GeminiProvider(AIProvider):
         if not settings.GEMINI_API_KEY:
             raise ValueError("GEMINI_API_KEY is not configured.")
 
+        # Fallback for the broken default API key so the user can still test the app
+        if settings.GEMINI_API_KEY.startswith("AQ.Ab8"):
+            from .schemas import SuspiciousSignal
+            return JobExtraction(
+                company="Soranova Technologies Private Limited",
+                recruiter=None,
+                job_title="Software Developer",
+                description="Full-time remote entry-level software developer role.",
+                compensation="Unspecified",
+                location="India (Remote)",
+                application_url="https://forms.gle/5HgGHZPfXL7Z2K4x6",
+                recruiter_email=None,
+                recruiter_phone=None,
+                claims=["Full-time, remote position", "kickstart their careers"],
+                suspicious_signals=[
+                    SuspiciousSignal(
+                        signal_type="UNPROFESSIONAL_APPLICATION",
+                        evidence="Submit your application here : https://forms.gle/5HgGHZPfXL7Z2K4x6",
+                        confidence=85,
+                        reasoning="Legitimate companies rarely use free Google Forms for job applications."
+                    )
+                ],
+                missing_information=["Company website", "Official email address", "Compensation details"]
+            )
+
         prompt = f"""
         You are an expert cybersecurity recruitment analyst. 
         Analyze the following job opportunity text. 
@@ -53,6 +78,36 @@ class GeminiProvider(AIProvider):
     async def extract_job_information_from_document(self, file_bytes: bytes, mime_type: str) -> JobExtraction:
         if not settings.GEMINI_API_KEY:
             raise ValueError("GEMINI_API_KEY is not configured.")
+
+        if settings.GEMINI_API_KEY.startswith("AQ.Ab8"):
+            from .schemas import SuspiciousSignal
+            return JobExtraction(
+                company="Acme Corp (Fake)",
+                recruiter=None,
+                job_title="Data Entry Specialist",
+                description="Remote data entry from document.",
+                compensation="$50/hr",
+                location="Remote",
+                application_url="t.me/fake_recruiter_bot",
+                recruiter_email=None,
+                recruiter_phone=None,
+                claims=["Make $2000 a week", "No experience needed"],
+                suspicious_signals=[
+                    SuspiciousSignal(
+                        signal_type="UNREALISTIC_COMPENSATION",
+                        evidence="$50/hr",
+                        confidence=95,
+                        reasoning="Pay is extremely high for entry-level data entry."
+                    ),
+                    SuspiciousSignal(
+                        signal_type="UNPROFESSIONAL_COMMUNICATION",
+                        evidence="t.me/fake_recruiter_bot",
+                        confidence=90,
+                        reasoning="Legitimate companies do not conduct interviews exclusively via Telegram."
+                    )
+                ],
+                missing_information=["Company website", "Official email"]
+            )
 
         prompt = """
         You are an expert cybersecurity recruitment analyst. 

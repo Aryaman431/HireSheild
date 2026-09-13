@@ -45,9 +45,9 @@ async def async_client(db_session):
 
 @pytest.fixture
 def override_auth():
-    def _override(user_id: str = "test_user_123"):
+    def _override(user_id: str = "test_user_123", is_admin: bool = False):
         async def mock_get_current_user():
-            return User(id=user_id, email=f"{user_id}@test.com", name="Test User", auth_provider="supabase")
+            return User(id=user_id, email=f"{user_id}@test.com", name="Test User", auth_provider="clerk", is_admin=is_admin)
         app.dependency_overrides[get_current_user] = mock_get_current_user
     
     yield _override

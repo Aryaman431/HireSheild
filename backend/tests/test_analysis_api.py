@@ -31,14 +31,13 @@ def mock_gemini():
         yield instance
 
 @pytest.mark.asyncio
-async def test_analyze_job_authenticated(mock_gemini, db_session):
-    # This requires overriding the db dependency as well if we hit the actual DB.
+async def test_analyze_job_authenticated(mock_gemini, auth_client):
     # We can patch the AnalysisService instead for a pure API test.
     with patch('app.api.jobs.AnalysisService') as MockService:
         service_instance = MockService.return_value
         service_instance.analyze_job_text = AsyncMock(return_value="mock-job-id")
         
-        response = client.post("/api/v1/jobs/analyze", json={
+        response = await auth_client.post("/api/v1/jobs/analyze", json={
             "text": "This is a job opportunity that looks normal."
         })
         
@@ -46,29 +45,24 @@ async def test_analyze_job_authenticated(mock_gemini, db_session):
         assert response.json()["job_id"] == "mock-job-id"
         service_instance.analyze_job_text.assert_called_once_with("This is a job opportunity that looks normal.")
 
-def test_analyze_job_unauthenticated():
-    # Remove the dependency override to test actual auth
-    app.dependency_overrides.pop(get_current_user, None)
-    
-    response = client.post("/api/v1/jobs/analyze", json={
+@pytest.mark.asyncio
+async def test_analyze_job_unauthenticated(async_client):
+    response = await async_client.post("/api/v1/jobs/analyze", json={
         "text": "This is a job opportunity."
     })
     
     # Should be 401 Unauthorized because no credentials provided
     assert response.status_code == 401
-    
-    # Restore for other tests
-    app.dependency_overrides[get_current_user] = override_get_current_user
 
 @pytest.mark.asyncio
-async def test_analyze_job_ai_failure(mock_gemini, db_session):
+async def test_analyze_job_ai_failure(mock_gemini, auth_client):
     with patch('app.api.jobs.AnalysisService') as MockService:
         service_instance = MockService.return_value
         service_instance.analyze_job_text = AsyncMock(side_effect=RuntimeError("Analysis failed: Gemini API unavailable"))
         
-        response = client.post("/api/v1/jobs/analyze", json={
+        response = await auth_client.post("/api/v1/jobs/analyze", json={
             "text": "This is a job opportunity."
         })
         
         assert response.status_code == 500
-        assert "Analysis failed: Gemini API unavailable" in response.json()["detail"]
+        assert "An error occurred during text analysis." in response.json()["detail"]

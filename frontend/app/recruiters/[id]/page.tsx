@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { auth } from "@clerk/nextjs/server"
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import RiskVisualization from '@/components/RiskVisualization'
@@ -11,17 +11,17 @@ interface VerificationCheck {
 }
 
 async function getRecruiterIntelligence(id: string) {
-  const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
+  const { userId, getToken } = await auth()
   
-  if (!session) {
+  if (!userId) {
     return null
   }
+  const token = await getToken()
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
   const response = await fetch(`${apiUrl}/api/v1/recruiters/${id}`, {
     headers: {
-      'Authorization': `Bearer ${session.access_token}`
+      ...(token && { 'Authorization': `Bearer ${token}` })
     }
   })
 

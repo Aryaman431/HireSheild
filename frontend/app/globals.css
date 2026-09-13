@@ -3,7 +3,12 @@
 @theme {
   --color-brand-50: #eff6ff;
   --color-brand-100: #dbeafe;
+  --color-brand-200: #bfdbfe;
+  --color-brand-300: #93c5fd;
+  --color-brand-400: #60a5fa;
   --color-brand-500: #3b82f6;
+  --color-brand-600: #2563eb;
+  --color-brand-700: #1d4ed8;
   --color-brand-900: #1e3a8a;
 
   /* HireShield Risk Colors */
@@ -106,4 +111,108 @@
   .btn-primary {
     @apply px-4 py-2 rounded-md font-mono text-sm tracking-wider uppercase bg-brand-500 text-white hover:bg-brand-500/90 shadow-[0_0_15px_rgba(59,130,246,0.3)] hover:shadow-[0_0_25px_rgba(59,130,246,0.5)] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-brand-500/50;
   }
+}
+
+/* =====================================================
+   HOMEPAGE — Intelligence Grid & Investigation Styles
+   ===================================================== */
+
+/* Subtle technical grid background */
+.intel-grid {
+  background-image:
+    linear-gradient(rgba(51, 65, 85, 0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(51, 65, 85, 0.12) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* Radial overlay for the hero area */
+.intel-radial {
+  background: radial-gradient(
+    ellipse 600px 400px at 50% 0%,
+    rgba(59, 130, 246, 0.06) 0%,
+    transparent 70%
+  );
+}
+
+/* Slow scanning line */
+@keyframes scanline {
+  0% { transform: translateY(-100%); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(600px); opacity: 0; }
+}
+
+.scan-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(59, 130, 246, 0.4) 20%,
+    rgba(59, 130, 246, 0.6) 50%,
+    rgba(59, 130, 246, 0.4) 80%,
+    transparent 100%
+  );
+  animation: scanline 8s ease-in-out infinite;
+}
+
+/* Pipeline connector pulse */
+@keyframes connector-pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.8; }
+}
+
+.connector-dot {
+  animation: connector-pulse 3s ease-in-out infinite;
+}
+
+/* Risk gauge ring */
+@keyframes gauge-fill {
+  from { stroke-dashoffset: 251.2; }
+}
+
+.risk-gauge-ring {
+  animation: gauge-fill 1.5s ease-out forwards;
+}
+
+/* Signal indicator pulse */
+@keyframes signal-pulse {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.3); }
+}
+
+.signal-dot {
+  animation: signal-pulse 2s ease-in-out infinite;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .scan-line,
+  .connector-dot,
+  .risk-gauge-ring,
+  .signal-dot {
+    animation: none;
+  }
+  .scan-line { opacity: 0; }
+  .connector-dot { opacity: 0.5; }
+  .risk-gauge-ring { stroke-dashoffset: 0; }
+  .signal-dot { opacity: 0.7; transform: scale(1); }
+}
+
+/* Investigation panel chrome — accent bar */
+.panel-chrome {
+  position: relative;
+}
+.panel-chrome::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-brand-500), transparent);
+  opacity: 0.5;
 }

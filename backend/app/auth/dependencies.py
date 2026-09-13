@@ -1,20 +1,37 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import jwt
+from jwt import PyJWKClient
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
-from .supabase import decode_supabase_jwt
+from app.core.config import settings
 from app.core.database import get_db
 from app.models.user import User
 
 security = HTTPBearer()
 
+jwks_client = PyJWKClient(settings.CLERK_JWKS_URL) if settings.CLERK_JWKS_URL else None
+
+def decode_clerk_jwt(token: str) -> dict:
+    if not jwks_client:
+        raise ValueError("CLERK_JWKS_URL is not set.")
+    try:
+        signing_key = jwks_client.get_signing_key_from_jwt(token)
+        payload = jwt.decode(
+            token,
+            signing_key.key,
+            algorithms=["RS256"],
+            options={"verify_aud": False}
+        )
+        return payload
+    except jwt.ExpiredSignatureError:
+        raise jwt.ExpiredSignatureError("Token has expired")
+    except jwt.PyJWTError as e:
+        raise jwt.InvalidTokenError(f"Invalid token: {str(e)}")
+
+
 def get_jwt_payload(credentials: HTTPAuthorizationCredentials = Depends(security)) -> dict:
-    """
-    Extracts and validates the JWT from the Authorization header.
-    Returns the decoded JWT payload.
-    """
     if not credentials or not credentials.credentials:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -23,7 +40,7 @@ def get_jwt_payload(credentials: HTTPAuthorizationCredentials = Depends(security
         )
     token = credentials.credentials
     try:
-        payload = decode_supabase_jwt(token)
+        payload = decode_clerk_jwt(token)
         return payload
     except jwt.ExpiredSignatureError:
         raise HTTPException(
@@ -31,17 +48,21 @@ def get_jwt_payload(credentials: HTTPAuthorizationCredentials = Depends(security
             detail="Token has expired",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    except jwt.InvalidTokenError:
+    except jwt.InvalidTokenError as e:
+        import logging
+        logging.error(f"JWT Validation failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authentication token",
+            detail=f"Invalid authentication token: {e}",
             headers={"WWW-Authenticate": "Bearer"},
+        )
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Server configuration error",
         )
 
 def get_current_user_id(payload: dict = Depends(get_jwt_payload)) -> str:
-    """
-    Returns the Supabase Auth user ID (UUID string).
-    """
     user_id = payload.get("sub")
     if not user_id:
         raise HTTPException(
@@ -55,26 +76,34 @@ async def get_current_user(
     payload: dict = Depends(get_jwt_payload),
     db: AsyncSession = Depends(get_db)
 ) -> User:
-    """
-    Fetches the User model from the database based on the authenticated Supabase user ID.
-    If the user does not exist in the local database yet, it creates a synchronized record.
-    """
     user_id = payload.get("sub")
     if not user_id:
         raise HTTPException(status_code=401, detail="Missing subject in token")
         
-    result = await db.execute(select(User).where(User.id == user_id))
+    result = await db.execute(select(User).where(User.clerk_user_id == user_id))
     user = result.scalar_one_or_none()
     
     if not user:
-        # User is authenticated via Supabase but doesn't exist locally yet.
-        # Synchronize the record using details from the JWT.
-        email = payload.get("email") or f"{user_id}@placeholder.supabase"
-        name = payload.get("user_metadata", {}).get("full_name") or "New Investigator"
+        email = payload.get("email") or f"{user_id}@placeholder.clerk"
+        name = payload.get("name") or "Investigator"
         
-        user = User(id=user_id, email=email, name=name, auth_provider="supabase")
+        user = User(
+            clerk_user_id=user_id,
+            email=email,
+            name=name,
+            auth_provider="clerk",
+            is_admin=False
+        )
         db.add(user)
         await db.commit()
         await db.refresh(user)
 
     return user
+
+async def require_admin(current_user: User = Depends(get_current_user)) -> User:
+    if not current_user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Insufficient permissions. Admin access required."
+        )
+    return current_user

@@ -1,9 +1,9 @@
 import Link from "next/link"
-import { createClient } from "@/lib/supabase/server"
+import { UserButton, SignInButton, SignUpButton } from "@clerk/nextjs"
+import { auth } from "@clerk/nextjs/server"
 
 export default async function Navigation() {
-  const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
+  const { userId } = await auth()
 
   return (
     <header className="border-b border-surface-elevated bg-slate-950/80 backdrop-blur-md sticky top-0 z-50">
@@ -22,17 +22,18 @@ export default async function Navigation() {
         </nav>
 
         <div className="flex items-center gap-4">
-          {session ? (
+          {userId ? (
             <div className="flex items-center gap-4">
-              <span className="hidden md:inline text-xs font-mono text-brand-500/80">ID: {session.user.id.substring(0, 8)}</span>
-              <form action="/auth/signout" method="post">
-                <button type="submit" className="text-[10px] font-mono uppercase tracking-widest text-slate-500 hover:text-risk-critical transition-colors">Log Out</button>
-              </form>
+              <UserButton />
             </div>
           ) : (
             <div className="flex items-center gap-4">
-              <Link href="/login" className="text-xs font-mono uppercase tracking-widest text-slate-400 hover:text-slate-200">Log In</Link>
-              <Link href="/signup" className="text-[10px] font-mono font-bold uppercase tracking-widest bg-brand-500 text-slate-950 px-3 py-1 rounded hover:bg-brand-400 transition-colors">Initialize</Link>
+              <SignInButton mode="modal">
+                <button className="text-xs font-mono uppercase tracking-widest text-slate-400 hover:text-slate-200">Log In</button>
+              </SignInButton>
+              <SignUpButton mode="modal">
+                <button className="text-[10px] font-mono font-bold uppercase tracking-widest bg-brand-500 text-slate-950 px-3 py-1 rounded hover:bg-brand-400 transition-colors">Initialize</button>
+              </SignUpButton>
             </div>
           )}
         </div>

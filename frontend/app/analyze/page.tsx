@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import { useAuth } from '@clerk/nextjs'
 
 const LOADING_STAGES = [
   "VALIDATING SOURCE",
@@ -22,6 +23,7 @@ const ALLOWED_MIME_TYPES = {
 
 export default function AnalyzePage() {
   const router = useRouter()
+  const { getToken } = useAuth()
   const [activeTab, setActiveTab] = useState<'TEXT' | 'IMAGE' | 'PDF'>('TEXT')
   
   const [text, setText] = useState('')
@@ -94,11 +96,7 @@ export default function AnalyzePage() {
     }, 1500)
 
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
-      const { data: { session } } = await supabase.auth.getSession()
-      
-      const token = session?.access_token
+      const token = await getToken()
       if (!token) {
         throw new Error("Authentication session expired.")
       }

@@ -1,21 +1,25 @@
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 import mimetypes
 
 from app.core.database import get_db
 from app.auth.dependencies import get_current_user
 from app.models.user import User
+from app.models.job_posting import JobPosting
 from app.ai.gemini import GeminiProvider
 from app.services.analysis_service import AnalysisService
 from app.core.config import settings
 from .schemas import AnalyzeJobRequest, AnalyzeJobResponse
+from app.core.rate_limit import limiter
 
 router = APIRouter()
 
 ALLOWED_MIME_TYPES = ["image/png", "image/jpeg", "image/webp", "application/pdf"]
 
 @router.post("/analyze-file", response_model=AnalyzeJobResponse)
+@limiter.limit("10/hour")
 async def analyze_job_file(
+    request: Request,
     file: UploadFile = File(...),
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
@@ -40,16 +44,23 @@ async def analyze_job_file(
     
     try:
         job_id = await service.analyze_job_file(file_bytes, file.filename, file.content_type)
+        # Assign ownership to the created job
+        job = await db.get(JobPosting, job_id)
+        if job:
+            job.user_id = current_user.id
+            await db.commit()
         return AnalyzeJobResponse(job_id=job_id)
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=str(e)
+            detail="An error occurred during file analysis."
         )
 
 @router.post("/analyze", response_model=AnalyzeJobResponse)
+@limiter.limit("10/hour")
 async def analyze_job(
-    request: AnalyzeJobRequest,
+    request: Request,
+    analyze_request: AnalyzeJobRequest,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
@@ -66,12 +77,20 @@ async def analyze_job(
     service = AnalysisService(ai_provider, db)
     
     try:
-        job_id = await service.analyze_job_text(request.text)
+        job_id = await service.analyze_job_text(analyze_request.text)
+        job = await db.get(JobPosting, job_id)
+        if job:
+            job.user_id = current_user.id
+            await db.commit()
         return AnalyzeJobResponse(job_id=job_id)
     except Exception as e:
+        import logging
+        import traceback
+        logging.error(f"Analysis Error: {e}")
+        logging.error(traceback.format_exc())
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=str(e)
+            detail=f"An error occurred during text analysis: {e}"
         )
 
 @router.get("/{job_id}/result")
@@ -89,6 +108,10 @@ async def get_job_result(
     result = await service.get_analysis_result(job_id)
     
     if not result:
+        raise HTTPException(status_code=404, detail="Analysis result not found")
+        
+    job = await db.get(JobPosting, job_id)
+    if job and job.user_id != current_user.id:
         raise HTTPException(status_code=404, detail="Analysis result not found")
         
     return result
@@ -109,7 +132,7 @@ async def get_job_verification(
     result = await db.execute(select(JobPosting).where(JobPosting.id == job_id))
     job = result.scalar_one_or_none()
     
-    if not job:
+    if not job or job.user_id != current_user.id:
         raise HTTPException(status_code=404, detail="Analysis result not found")
         
     entity_ids = [job.id]
@@ -156,7 +179,13 @@ async def recheck_job_verification(
     from app.services.verification_service import VerificationService
     service = VerificationService(db)
     try:
+        job = await db.get(JobPosting, job_id)
+        if not job or job.user_id != current_user.id:
+            raise HTTPException(status_code=404, detail="Job not found")
+            
         await service.perform_verification_for_job(job_id, force_recheck=True)
         return {"status": "success", "message": "Verification completed"}
+    except HTTPException:
+        raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Verification failed.")

@@ -13,7 +13,9 @@ class User(Base, TimestampMixin):
     id: Mapped[str] = mapped_column(String, primary_key=True, default=generate_uuid)
     email: Mapped[str] = mapped_column(String, unique=True, index=True)
     name: Mapped[str] = mapped_column(String)
-    auth_provider: Mapped[str] = mapped_column(String, default="supabase")
+    auth_provider: Mapped[str] = mapped_column(String, default="clerk")
+    clerk_user_id: Mapped[str | None] = mapped_column(String, unique=True, index=True, nullable=True)
+    is_admin: Mapped[bool] = mapped_column(default=False, server_default='false')
 
     reports: Mapped[List["Report"]] = relationship(back_populates="user", cascade="all, delete-orphan")
     confirmations: Mapped[List["CommunityConfirmation"]] = relationship(back_populates="user", cascade="all, delete-orphan")
