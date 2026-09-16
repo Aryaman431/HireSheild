@@ -1,62 +1,103 @@
 import { auth } from "@clerk/nextjs/server"
-import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import ReportOpportunityForm from '@/components/ReportOpportunityForm'
 import VerificationPanel from '@/components/VerificationPanel'
 import RiskVisualization from '@/components/RiskVisualization'
 import RiskSignalRow from '@/components/RiskSignalRow'
+import { getServerApiUrl } from '@/lib/api'
 
 async function getAnalysisResult(id: string, token: string | null) {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+  const apiUrl = getServerApiUrl()
   if (!token) {
-    return null
+    return { status: 'unauthorized' as const }
   }
-  const response = await fetch(`${apiUrl}/api/v1/jobs/${id}`, {
-    headers: {
-      'Authorization': `Bearer ${token}`
-    },
-    cache: 'no-store'
-  })
 
-  if (!response.ok) {
-    return null
+  try {
+    const response = await fetch(`${apiUrl}/api/v1/jobs/${id}/result`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+      cache: 'no-store'
+    })
+
+    if (response.status === 401 || response.status === 404) {
+      return { status: 'not_found' as const }
+    }
+
+    if (!response.ok) {
+      return { status: 'error' as const }
+    }
+
+    return { status: 'ok' as const, data: await response.json() }
+  } catch {
+    return { status: 'error' as const }
   }
-  return response.json()
 }
 
 async function getHistoricalIntelligence(id: string, token: string | null) {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-  const response = await fetch(`${apiUrl}/api/v1/jobs/${id}/intelligence/historical`, {
-    headers: {
-      'Authorization': `Bearer ${token}`
-    },
-    cache: 'no-store'
-  })
-
-  if (!response.ok) {
-    return null
+  const apiUrl = getServerApiUrl()
+  if (!token) {
+    return { available: false, similar_opportunities: [], pattern_summary: {} }
   }
-  return response.json()
+
+  try {
+    const response = await fetch(`${apiUrl}/api/v1/jobs/${id}/historical-intelligence`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+      cache: 'no-store'
+    })
+
+    if (!response.ok) {
+      return { available: false, similar_opportunities: [], pattern_summary: {} }
+    }
+
+    return response.json()
+  } catch {
+    return { available: false, similar_opportunities: [], pattern_summary: {} }
+  }
 }
 
-export default async function ResultPage({ params }: { params: { id: string } }) {
-  const { userId, getToken } = await auth()
+export default async function ResultPage({ params }: { params: Promise<{ id: string }> }) {
+  const { getToken } = await auth()
   const token = await getToken()
-  const result = await getAnalysisResult(params.id, token)
+  const { id } = await params
+  const resultResponse = await getAnalysisResult(id, token)
 
-  if (!result) {
-    redirect('/dashboard')
+  if (resultResponse.status !== 'ok') {
+    const message = resultResponse.status === 'unauthorized'
+      ? 'Your investigation is not available in this session.'
+      : resultResponse.status === 'not_found'
+        ? 'This investigation could not be found or is not accessible.'
+        : 'Investigation could not be loaded. Please try again.'
+
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-200 p-8">
+        <div className="max-w-2xl mx-auto mt-16 panel p-8">
+          <p className="tech-label text-brand-500">INVESTIGATION STATUS</p>
+          <h1 className="mt-3 text-3xl font-light tracking-wide text-white">Unable to load result</h1>
+          <p className="mt-4 text-slate-400">{message}</p>
+          <div className="mt-6 flex gap-3">
+            <Link href="/analyze" className="btn-primary">Analyze another job</Link>
+            <Link href="/dashboard" className="btn-ghost">Back to dashboard</Link>
+          </div>
+        </div>
+      </div>
+    )
   }
 
+  const result = resultResponse.data
+
   // Fetch historical intelligence
-  const historicalData = await getHistoricalIntelligence(params.id, token)
+  const historicalData = await getHistoricalIntelligence(id, token)
 
 
   
   // Note: For MVP we manually filter the reports on the frontend to avoid creating a whole new endpoint just for job reports list.
 
   // I will just mock job community intelligence using `HISTORICAL_REPORTS` signal presence.
-  const commSignal = result.signals.find((s: any) => s.type === 'HISTORICAL_REPORTS')
+  const signals = Array.isArray(result.signals) ? result.signals : []
+  const commSignal = signals.find((s: any) => s.type === 'HISTORICAL_REPORTS')
   const approvedReportsCount = commSignal ? parseInt(commSignal.reasoning.match(/\d+/)?.[0] || '0') : 0
 
 
@@ -95,11 +136,11 @@ export default async function ResultPage({ params }: { params: { id: string } })
           <div className="panel p-0 border-brand-500/30">
             <h2 className="tech-label text-brand-500 border-b border-surface-elevated p-6 mb-0">KEY FINDINGS & SIGNALS</h2>
             
-            {result.signals.length === 0 ? (
+            {signals.length === 0 ? (
               <p className="text-slate-400 font-mono text-sm p-6">No suspicious signals detected by the risk engine.</p>
             ) : (
               <div className="flex flex-col px-6 pb-2">
-                {result.signals.map((signal: unknown, idx: number) => (
+                {signals.map((signal: unknown, idx: number) => (
                   <RiskSignalRow key={idx} signal={signal} />
                 ))}
               </div>
@@ -235,13 +276,13 @@ export default async function ResultPage({ params }: { params: { id: string } })
         <div className="panel p-6 border-brand-500/30">
           <h2 className="tech-label text-brand-500 border-b border-surface-elevated pb-2 mb-4">RECOMMENDED ACTIONS</h2>
           <ul className="space-y-3 font-mono text-sm text-slate-300">
-            {result.signals.map((s: {type: string}) => getRecommendation(s.type)).filter(Boolean).map((rec: string, i: number) => (
+            {signals.map((s: {type: string}) => getRecommendation(s.type)).filter(Boolean).map((rec: string, i: number) => (
               <li key={i} className="flex gap-3 items-start">
                 <span className="text-brand-500 mt-0.5">▸</span>
                 <span>{rec}</span>
               </li>
             ))}
-            {result.signals.length === 0 && (
+            {signals.length === 0 && (
               <li className="flex gap-3 items-start text-slate-400">
                 <span>No immediate risk actions required. Proceed with normal caution.</span>
               </li>

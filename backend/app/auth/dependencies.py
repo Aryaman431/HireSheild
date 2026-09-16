@@ -2,6 +2,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import jwt
 from jwt import PyJWKClient
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
@@ -22,7 +23,11 @@ def decode_clerk_jwt(token: str) -> dict:
             token,
             signing_key.key,
             algorithms=["RS256"],
-            options={"verify_aud": False}
+            issuer=settings.CLERK_ISSUER_URL,
+            options={
+                "verify_aud": False,
+                "require": ["sub", "exp", "iat"],
+            },
         )
         return payload
     except jwt.ExpiredSignatureError:
@@ -48,12 +53,12 @@ def get_jwt_payload(credentials: HTTPAuthorizationCredentials = Depends(security
             detail="Token has expired",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    except jwt.InvalidTokenError as e:
+    except jwt.InvalidTokenError:
         import logging
-        logging.error(f"JWT Validation failed: {e}")
+        logging.warning("JWT validation failed")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"Invalid authentication token: {e}",
+            detail="Invalid authentication token",
             headers={"WWW-Authenticate": "Bearer"},
         )
     except ValueError as e:
@@ -95,8 +100,15 @@ async def get_current_user(
             is_admin=False
         )
         db.add(user)
-        await db.commit()
-        await db.refresh(user)
+        try:
+            await db.commit()
+            await db.refresh(user)
+        except IntegrityError:
+            await db.rollback()
+            result = await db.execute(select(User).where(User.clerk_user_id == user_id))
+            user = result.scalar_one_or_none()
+            if not user:
+                raise HTTPException(status_code=409, detail="Unable to provision authenticated user.")
 
     return user
 

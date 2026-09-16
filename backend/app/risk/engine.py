@@ -11,10 +11,17 @@ class RiskEngine:
         """
         base_score = 0
         signal_details = []
+        seen_signals = set()
         
         # 1. Evaluate Suspicious Signals from AI
         for signal in extraction.suspicious_signals:
-            score = get_signal_score(signal.signal_type)
+            signal_type = getattr(signal.signal_type, "value", signal.signal_type)
+            signal_identity = (signal_type, signal.evidence.strip())
+            if signal_identity in seen_signals:
+                continue
+            seen_signals.add(signal_identity)
+
+            score = get_signal_score(signal_type)
             if score == 0:
                 # If the AI hallucinates a signal type, we ignore it or treat it as low risk.
                 # But we keep it in the record for debugging.
@@ -23,7 +30,7 @@ class RiskEngine:
                 base_score += score
                 
             signal_details.append({
-                "signal_type": signal.signal_type,
+                "signal_type": signal_type,
                 "score_contribution": score,
                 "evidence": signal.evidence,
                 "reasoning": signal.reasoning,

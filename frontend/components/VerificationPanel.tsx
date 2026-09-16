@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { getBrowserApiUrl } from '@/lib/api'
 
 interface Check {
   id: string
@@ -28,7 +29,7 @@ export default function VerificationPanel({ jobId, accessToken }: { jobId: strin
   useEffect(() => {
     const fetchVerification = async () => {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+        const apiUrl = getBrowserApiUrl()
         const res = await fetch(`${apiUrl}/api/v1/jobs/${jobId}/verification`, {
           headers: { 'Authorization': `Bearer ${accessToken}` }
         })
@@ -49,7 +50,7 @@ export default function VerificationPanel({ jobId, accessToken }: { jobId: strin
     setIsRechecking(true)
     setError(null)
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+      const apiUrl = getBrowserApiUrl()
       const res = await fetch(`${apiUrl}/api/v1/jobs/${jobId}/verification/recheck`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${accessToken}` }

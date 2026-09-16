@@ -4,13 +4,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import HTTPException
 from app.models.user import User
 from app.models.report import Report, ReportStatus
+from app.models.company import Company
+from app.models.job_posting import JobPosting
 from app.schemas.report import ReportCreate, ReportCategory
 from app.services.report_service import ReportService
 
 @pytest_asyncio.fixture
 async def test_user(db_session: AsyncSession):
     import uuid
-    user = User(email=f"reporter_{uuid.uuid4()}@test.com", auth_provider="supabase", name="Reporter", id=f"rep_{uuid.uuid4()}")
+    user = User(email=f"reporter_{uuid.uuid4()}@test.com", auth_provider="clerk", name="Reporter", id=f"rep_{uuid.uuid4()}")
     db_session.add(user)
     await db_session.commit()
     await db_session.refresh(user)
@@ -18,8 +20,10 @@ async def test_user(db_session: AsyncSession):
 
 @pytest.mark.asyncio
 async def test_create_report_success(db_session: AsyncSession, test_user: User):
+    db_session.add(Company(id="comp_123", name="Acme", normalized_name="acme"))
+    await db_session.commit()
     report_data = ReportCreate(
-        company_id="comp_123", # mock id, we assume it's just stored as string or mocked
+        company_id="comp_123",
         reason=ReportCategory.UPFRONT_PAYMENT,
         description="They asked me to pay 5000 INR."
     )
@@ -43,8 +47,24 @@ async def test_create_report_no_entity(db_session: AsyncSession, test_user: User
         await ReportService.create_report(db_session, test_user.id, report_data)
     assert excinfo.value.status_code == 400
 
+
+@pytest.mark.asyncio
+async def test_create_report_rejects_missing_entity_reference(db_session: AsyncSession, test_user: User):
+    report_data = ReportCreate(
+        company_id="does-not-exist",
+        reason=ReportCategory.PHISHING,
+        description="This report references nothing real.",
+    )
+
+    with pytest.raises(HTTPException) as excinfo:
+        await ReportService.create_report(db_session, test_user.id, report_data)
+
+    assert excinfo.value.status_code == 404
+
 @pytest.mark.asyncio
 async def test_duplicate_report(db_session: AsyncSession, test_user: User):
+    db_session.add(JobPosting(id="job_1"))
+    await db_session.commit()
     report_data = ReportCreate(
         job_posting_id="job_1",
         reason=ReportCategory.FAKE_JOB_POSTING,
@@ -65,8 +85,37 @@ async def test_duplicate_report(db_session: AsyncSession, test_user: User):
         await ReportService.create_report(db_session, test_user.id, report_data_2)
     assert excinfo.value.status_code == 409
 
+
+@pytest.mark.asyncio
+async def test_duplicate_company_report_is_rejected(db_session: AsyncSession, test_user: User):
+    db_session.add(Company(id="company-duplicate", name="Acme", normalized_name="acme"))
+    await db_session.commit()
+    report_data = ReportCreate(
+        company_id="company-duplicate",
+        reason=ReportCategory.PHISHING,
+        description="The same company phishing report.",
+        evidence="contacted from a fake domain",
+    )
+
+    await ReportService.create_report(db_session, test_user.id, report_data)
+
+    with pytest.raises(HTTPException) as excinfo:
+        await ReportService.create_report(
+            db_session,
+            test_user.id,
+            ReportCreate(
+                company_id="company-duplicate",
+                reason=ReportCategory.PHISHING,
+                description="  The same company phishing report.  ",
+                evidence="CONTACTED   FROM A FAKE DOMAIN",
+            ),
+        )
+    assert excinfo.value.status_code == 409
+
 @pytest.mark.asyncio
 async def test_moderate_report(db_session: AsyncSession, test_user: User):
+    db_session.add(Company(id="comp_1", name="Acme", normalized_name="acme"))
+    await db_session.commit()
     report_data = ReportCreate(
         company_id="comp_1",
         reason=ReportCategory.OTHER,

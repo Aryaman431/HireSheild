@@ -1,4 +1,4 @@
-from urllib.parse import urlparse
+from urllib.parse import urljoin, urlsplit
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from app.models.verification_check import VerificationCheck, EntityType, CheckType, CheckResult
@@ -6,7 +6,8 @@ from app.models.company import Company, VerificationStatus as CompanyVerificatio
 from app.models.recruiter import Recruiter
 from app.models.job_posting import JobPosting
 from app.models.risk_signal import RiskSignal, RiskLevel
-from app.risk.rules import RiskSignalType
+from app.risk.rules import RiskSignalType, get_signal_score
+from app.risk.aggregation import RiskAggregation
 import httpx
 import socket
 import ipaddress
@@ -14,54 +15,89 @@ import asyncio
 from typing import Optional, Tuple
 
 class SafeURLFetcher:
+    MAX_REDIRECTS = 3
+    MAX_RESPONSE_BYTES = 1024 * 1024
+    client_factory = httpx.AsyncClient
+
+    @staticmethod
+    def _is_public_ip(ip: ipaddress.IPv4Address | ipaddress.IPv6Address) -> bool:
+        if isinstance(ip, ipaddress.IPv6Address) and ip.ipv4_mapped:
+            ip = ip.ipv4_mapped
+        return ip.is_global
+
+    @classmethod
+    def _parse_url(cls, url: str):
+        try:
+            parsed = urlsplit(url)
+            if parsed.scheme not in {"http", "https"}:
+                return None, "Unsupported protocol."
+            if not parsed.hostname or parsed.username or parsed.password:
+                return None, "Invalid URL."
+            if parsed.port is not None and not 1 <= parsed.port <= 65535:
+                return None, "Invalid URL."
+            return parsed, ""
+        except ValueError:
+            return None, "Invalid URL."
+
     @staticmethod
     async def is_safe_ip(hostname: str) -> bool:
         try:
             loop = asyncio.get_running_loop()
-            ip_addr = await loop.run_in_executor(None, socket.gethostbyname, hostname)
-            ip = ipaddress.ip_address(ip_addr)
-            return not (ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_multicast or ip.is_reserved or ip.is_unspecified)
+            try:
+                ip = ipaddress.ip_address(hostname)
+                return SafeURLFetcher._is_public_ip(ip)
+            except ValueError:
+                if hostname.lower() == "localhost" or hostname.lower().endswith((".localhost", ".local", ".internal")):
+                    return False
+
+            addresses = await loop.run_in_executor(
+                None,
+                lambda: socket.getaddrinfo(hostname, None, type=socket.SOCK_STREAM),
+            )
+            if not addresses:
+                return False
+            return all(SafeURLFetcher._is_public_ip(ipaddress.ip_address(address[4][0])) for address in addresses)
         except Exception:
             return False
 
     @classmethod
     async def fetch(cls, url: str) -> Tuple[Optional[httpx.Response], str]:
         """
-        Safely fetch a URL following redirects up to 3 times, checking each step for SSRF.
-        Returns (Response, Final_URL, ErrorMessage).
+        Safely fetch a URL with manually validated, bounded redirects.
+        Returns (Response, ErrorMessage).
         """
+        current_url = url
         try:
-            parsed = urlparse(url)
-            if parsed.scheme not in ('http', 'https'):
-                return None, "Unsupported protocol."
-                
-            if not parsed.hostname:
-                return None, "Invalid hostname."
-                
-            if not await cls.is_safe_ip(parsed.hostname):
-                return None, "Unsafe or unresolvable hostname."
-                
-            async with httpx.AsyncClient(timeout=5.0, follow_redirects=False) as client:
-                current_url = url
-                for _ in range(3):
-                    resp = await client.get(current_url)
-                    if 300 <= resp.status_code < 400 and 'location' in resp.headers:
-                        next_url = resp.headers['location']
-                        # Handle relative redirects
-                        if not next_url.startswith('http'):
-                            from urllib.parse import urljoin
-                            next_url = urljoin(current_url, next_url)
-                        parsed_next = urlparse(next_url)
-                        if parsed_next.scheme not in ('http', 'https') or not await cls.is_safe_ip(parsed_next.hostname):
-                            return None, "Unsafe redirect target."
-                        current_url = next_url
-                    else:
-                        return resp, ""
+            async with cls.client_factory(timeout=5.0, follow_redirects=False) as client:
+                for redirect_count in range(cls.MAX_REDIRECTS + 1):
+                    parsed, parse_error = cls._parse_url(current_url)
+                    if not parsed:
+                        return None, parse_error
+                    if not await cls.is_safe_ip(parsed.hostname):
+                        return None, "Unsafe or unresolvable hostname."
+
+                    async with client.stream("GET", current_url) as response:
+                        if 300 <= response.status_code < 400:
+                            location = response.headers.get("location")
+                            if not location:
+                                return None, "Invalid redirect target."
+                            if redirect_count >= cls.MAX_REDIRECTS:
+                                return None, "Too many redirects."
+                            current_url = urljoin(str(response.url), location)
+                            continue
+
+                        response_size = 0
+                        async for chunk in response.aiter_bytes():
+                            response_size += len(chunk)
+                            if response_size > cls.MAX_RESPONSE_BYTES:
+                                return None, "Verification response is too large."
+                        return response, ""
+
                 return None, "Too many redirects."
-        except httpx.RequestError as e:
-            return None, f"Network error: {str(e)}"
-        except Exception as e:
-            return None, "Failed to resolve URL."
+        except httpx.RequestError:
+            return None, "Network error while fetching URL."
+        except Exception:
+            return None, "Failed to fetch URL safely."
 
 class VerificationService:
     def __init__(self, db: AsyncSession):
@@ -90,13 +126,11 @@ class VerificationService:
             source = 'http://' + source
             
         try:
-            parsed = urlparse(source)
-            domain = parsed.netloc
+            parsed = urlsplit(source)
+            domain = parsed.hostname
             # Remove www.
             if domain.startswith('www.'):
                 domain = domain[4:]
-            # Remove port if exists
-            domain = domain.split(':')[0]
             return domain if domain else None
         except Exception:
             return None
@@ -311,6 +345,17 @@ class VerificationService:
                         company.verification_status = CompanyVerificationStatus.PARTIALLY_VERIFIED
                     else:
                         company.verification_status = CompanyVerificationStatus.UNVERIFIED
+
+                    if any(
+                        check.check_type == CheckType.COMPANY_DOMAIN and check.result == CheckResult.VERIFIED
+                        for check in comp_checks
+                    ):
+                        await self._inject_risk_signal(
+                            job.id,
+                            job.analysis_runs[0].id if job.analysis_runs else None,
+                            RiskSignalType.VERIFIED_COMPANY_DOMAIN,
+                            reasoning="The company domain was reachable and verified over HTTPS or HTTP.",
+                        )
                 
         # Verify Recruiter
         if recruiter and company:
@@ -328,11 +373,16 @@ class VerificationService:
                         await self._inject_risk_signal(
                             job.id, job.analysis_runs[0].id if job.analysis_runs else None,
                             RiskSignalType.POSSIBLE_IMPERSONATION,
-                            20,
                             "Recruiter email domain does not match company domain."
                         )
                     elif has_verified:
                         recruiter.verification_status = CompanyVerificationStatus.VERIFIED
+                        await self._inject_risk_signal(
+                            job.id,
+                            job.analysis_runs[0].id if job.analysis_runs else None,
+                            RiskSignalType.VERIFIED_RECRUITER,
+                            reasoning="The recruiter email domain matches the company's known domain.",
+                        )
                     else:
                         recruiter.verification_status = CompanyVerificationStatus.UNVERIFIED
                         
@@ -347,23 +397,43 @@ class VerificationService:
                     await self._inject_risk_signal(
                         job.id, job.analysis_runs[0].id if job.analysis_runs else None,
                         RiskSignalType.SUSPICIOUS_APPLICATION_URL,
-                        25,
                         "Application URL is unreachable, unsafe, or redirects unexpectedly."
                     )
+
+                if (
+                    any(c.result == CheckResult.VERIFIED for c in app_checks)
+                    and company
+                    and self.extract_domain(job.source_url) == self.extract_domain(company.official_domain)
+                ):
+                    await self._inject_risk_signal(
+                        job.id,
+                        job.analysis_runs[0].id if job.analysis_runs else None,
+                        RiskSignalType.VERIFIED_OFFICIAL_JOB,
+                        "The application URL is reachable and matches the company's known domain.",
+                    )
+
+        if company:
+            company_jobs = await self.db.execute(select(JobPosting).where(JobPosting.company_id == company.id))
+            company.risk_score, company.risk_level = RiskAggregation.calculate_company_risk(company_jobs.scalars().all())
+        if recruiter:
+            recruiter_jobs = await self.db.execute(select(JobPosting).where(JobPosting.recruiter_id == recruiter.id))
+            recruiter.risk_score, _ = RiskAggregation.calculate_recruiter_risk(recruiter_jobs.scalars().all())
                     
         await self.db.commit()
 
-    async def _inject_risk_signal(self, job_id: str, run_id: str, signal_type: RiskSignalType, score: int, reasoning: str):
+    async def _inject_risk_signal(self, job_id: str, run_id: str, signal_type: RiskSignalType, reasoning: str):
         # Check if already exists to avoid double counting
+        signal_value = getattr(signal_type, "value", signal_type)
         res = await self.db.execute(
-            select(RiskSignal).where(RiskSignal.job_posting_id == job_id).where(RiskSignal.signal_type == signal_type)
+            select(RiskSignal).where(RiskSignal.job_posting_id == job_id).where(RiskSignal.signal_type == signal_value)
         )
         if not res.scalars().first():
+            score = get_signal_score(signal_value)
             signal = RiskSignal(
                 job_posting_id=job_id,
                 analysis_run_id=run_id,
-                signal_type=signal_type,
-                severity=RiskLevel.HIGH,
+                signal_type=signal_value,
+                severity=RiskAggregation.get_risk_level(max(0, min(100, score))),
                 confidence=90,
                 reasoning=reasoning,
                 score_contribution=score
@@ -373,6 +443,5 @@ class VerificationService:
             # Update job risk score
             res_job = await self.db.execute(select(JobPosting).where(JobPosting.id == job_id))
             job = res_job.scalar_one()
-            job.risk_score = min(100, (job.risk_score or 0) + score)
-            from app.risk.aggregation import RiskAggregation
+            job.risk_score = max(0, min(100, (job.risk_score or 0) + score))
             job.risk_level = RiskAggregation.get_risk_level(job.risk_score)

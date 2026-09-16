@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     
     CLERK_SECRET_KEY: str | None = None
     CLERK_JWKS_URL: str | None = None # e.g. https://api.clerk.dev/v1/jwks
+    CLERK_ISSUER_URL: str | None = None
     
     CORS_ORIGINS: str = "http://localhost:3000"
 

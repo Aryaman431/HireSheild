@@ -38,9 +38,9 @@ async def get_company(
         "id": company.id,
         "name": company.name,
         "domain": company.official_domain,
-        "verification_status": company.verification_status.value if company.verification_status else "UNVERIFIED",
+        "verification_status": getattr(company.verification_status, 'value', company.verification_status) if company.verification_status else "UNVERIFIED",
         "risk_score": company.risk_score,
-        "risk_level": company.risk_level.value if company.risk_level else "UNKNOWN",
+        "risk_level": getattr(company.risk_level, 'value', company.risk_level) if company.risk_level else "UNKNOWN",
         "related_jobs_count": len(company.jobs),
         "recruiter_count": len(company.recruiters)
     }
@@ -78,31 +78,21 @@ async def get_company_intelligence(
     jobs = []
     high_risk_count = 0
     signal_counts = {}
-    
+
     for job in company.jobs:
         if job.risk_level in [RiskLevel.HIGH, RiskLevel.CRITICAL]:
             high_risk_count += 1
-            
+
         for sig in job.risk_signals:
             signal_counts[sig.signal_type.value] = signal_counts.get(sig.signal_type.value, 0) + 1
-            
+
         jobs.append({
-            "id": job.id,
-            "title": job.title,
             "risk_score": job.risk_score,
-            "risk_level": job.risk_level.value if job.risk_level else "UNKNOWN"
+            "risk_level": getattr(job.risk_level, 'value', job.risk_level) if job.risk_level else "UNKNOWN"
         })
-        
+
     common_signals = [sig for sig, count in signal_counts.items() if count > 0]
-        
-    recruiters = []
-    for rec in company.recruiters:
-        recruiters.append({
-            "id": rec.id,
-            "name": rec.name,
-            "verification_status": rec.verification_status.value if rec.verification_status else "UNVERIFIED"
-        })
-        
+
     return {
         "company": {
             "id": company.id,
@@ -110,12 +100,12 @@ async def get_company_intelligence(
             "domain": company.official_domain,
         },
         "verification": {
-            "status": company.verification_status.value if company.verification_status else "UNVERIFIED",
+            "status": getattr(company.verification_status, 'value', company.verification_status) if company.verification_status else "UNVERIFIED",
             "checks": [
                 {
                     "id": c.id,
-                    "check_type": c.check_type.value,
-                    "result": c.result.value,
+                    "check_type": getattr(c.check_type, 'value', c.check_type),
+                    "result": getattr(c.result, 'value', c.result),
                     "evidence": c.evidence,
                     "checked_at": c.checked_at.isoformat() if c.checked_at else None
                 }
@@ -124,12 +114,14 @@ async def get_company_intelligence(
         },
         "risk": {
             "score": company.risk_score,
-            "level": company.risk_level.value if company.risk_level else "UNKNOWN",
+            "level": getattr(company.risk_level, 'value', company.risk_level) if company.risk_level else "UNKNOWN",
             "historical_opportunities_count": len(jobs),
             "high_risk_opportunities_count": high_risk_count,
             "recurring_risk_signals": common_signals
         },
-        "related_jobs": jobs,
-        "associated_recruiters": recruiters,
-        "reports": [] # Phase 9 placeholder
+        "related_jobs": [],
+        "related_jobs_count": len(jobs),
+        "associated_recruiters": [],
+        "associated_recruiters_count": len(company.recruiters),
+        "reports": []
     }

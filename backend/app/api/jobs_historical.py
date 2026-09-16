@@ -53,7 +53,6 @@ async def get_historical_intelligence(
     
     formatted_jobs = []
     for job in similar_jobs:
-        # Distance metric is attached dynamically by the service
         distance = getattr(job, "_similarity_distance", None)
         relevance = "RELATED"
         if distance is not None:
@@ -61,19 +60,17 @@ async def get_historical_intelligence(
                 relevance = "VERY SIMILAR"
             elif distance <= 0.15:
                 relevance = "SIMILAR"
-                
+
         formatted_jobs.append({
-            "id": job.id,
-            "title": job.title,
-            "company": job.company.name if job.company else "Unknown",
-            "risk_score": job.risk_score,
-            "risk_level": job.risk_level.value if job.risk_level else "UNKNOWN",
             "relevance": relevance,
-            "created_at": job.created_at.isoformat() if job.created_at else None
+            "risk_level": getattr(job.risk_level, 'value', job.risk_level) if job.risk_level else "UNKNOWN",
+            "risk_score": job.risk_score,
+            "summary": "Private investigation details are withheld to protect user privacy."
         })
-        
+
     return {
         "available": True,
         "similar_opportunities": formatted_jobs,
-        "pattern_summary": patterns
+        "pattern_summary": patterns,
+        "privacy_guard": "Private historical investigation details are intentionally hidden."
     }

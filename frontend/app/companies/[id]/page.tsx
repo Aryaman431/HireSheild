@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { auth } from '@clerk/nextjs/server'
 import RiskVisualization from '@/components/RiskVisualization'
+import { getServerApiUrl } from '@/lib/api'
 
 async function getCompanyIntelligence(id: string) {
   const { userId, getToken } = await auth()
@@ -12,7 +13,7 @@ async function getCompanyIntelligence(id: string) {
 
   const token = await getToken()
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+  const apiUrl = getServerApiUrl()
   const response = await fetch(`${apiUrl}/api/v1/companies/${id}/intelligence`, {
     headers: {
       ...(token && { 'Authorization': `Bearer ${token}` })
@@ -32,8 +33,9 @@ async function getCompanyIntelligence(id: string) {
   }
 }
 
-export default async function CompanyDossierPage({ params }: { params: { id: string } }) {
-  const data = await getCompanyIntelligence(params.id)
+export default async function CompanyDossierPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const data = await getCompanyIntelligence(id)
 
   if (!data) {
     redirect('/dashboard')

@@ -3,6 +3,7 @@ from typing import List, Tuple
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy import func
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.dialects.postgresql import insert
 from fastapi import HTTPException
 
@@ -46,7 +47,20 @@ class CommunityService:
             )
             db.add(confirmation)
             
-        await db.commit()
+        try:
+            await db.commit()
+        except IntegrityError:
+            await db.rollback()
+            result = await db.execute(
+                select(CommunityConfirmation)
+                .where(CommunityConfirmation.report_id == report_id)
+                .where(CommunityConfirmation.user_id == user_id)
+            )
+            confirmation = result.scalar_one_or_none()
+            if not confirmation:
+                raise HTTPException(status_code=409, detail="Confirmation could not be saved.")
+            confirmation.response = response
+            await db.commit()
         await db.refresh(confirmation)
         return confirmation
 

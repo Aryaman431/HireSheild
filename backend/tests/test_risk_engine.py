@@ -85,3 +85,80 @@ def test_risk_engine_prompt_injection_simulation():
     assert result["risk_score"] == 30
     assert result["risk_level"] == RiskLevel.MODERATE
 
+
+def test_risk_engine_deduplicates_identical_signal_and_evidence():
+    extraction = JobExtraction(
+        suspicious_signals=[
+            SuspiciousSignal(signal_type="UPFRONT_PAYMENT", evidence="Pay $500", confidence=95, reasoning="Payment requested."),
+            SuspiciousSignal(signal_type="UPFRONT_PAYMENT", evidence="  Pay $500  ", confidence=90, reasoning="Repeated extraction."),
+        ]
+    )
+
+    result = RiskEngine.calculate_risk(extraction)
+
+    assert result["risk_score"] == 30
+    assert len(result["signal_details"]) == 1
+    assert sum(detail["score_contribution"] for detail in result["signal_details"]) == result["risk_score"]
+
+
+def test_risk_engine_allows_independent_evidence_for_different_signals():
+    extraction = JobExtraction(
+        suspicious_signals=[
+            SuspiciousSignal(signal_type="UPFRONT_PAYMENT", evidence="Pay $500", confidence=95, reasoning="Payment requested."),
+            SuspiciousSignal(signal_type="SUSPICIOUS_HIRING_PROCESS", evidence="Interview by chat only", confidence=95, reasoning="Unusual process."),
+        ]
+    )
+
+    result = RiskEngine.calculate_risk(extraction)
+
+    assert result["risk_score"] == 45
+    assert len(result["signal_details"]) == 2
+
+
+def test_risk_engine_applies_positive_verification_and_clamps_lower_bound():
+    extraction = JobExtraction(
+        suspicious_signals=[
+            SuspiciousSignal(signal_type="VERIFIED_OFFICIAL_JOB", evidence="official", confidence=100, reasoning="Verified."),
+            SuspiciousSignal(signal_type="VERIFIED_COMPANY_DOMAIN", evidence="domain", confidence=100, reasoning="Verified."),
+        ]
+    )
+
+    result = RiskEngine.calculate_risk(extraction)
+
+    assert result["risk_score"] == 0
+    assert result["risk_level"] == RiskLevel.LOW
+    assert sum(detail["score_contribution"] for detail in result["signal_details"]) == -40
+
+
+def test_risk_engine_levels_match_backend_thresholds():
+    cases = [
+        ([], RiskLevel.LOW),
+        (["UPFRONT_PAYMENT"], RiskLevel.MODERATE),
+        (["UPFRONT_PAYMENT", "HIGH_PRESSURE_LANGUAGE", "GUARANTEED_SELECTION"], RiskLevel.SUSPICIOUS),
+        (["UPFRONT_PAYMENT", "POSSIBLE_IMPERSONATION", "HIGH_PRESSURE_LANGUAGE"], RiskLevel.HIGH),
+        (["UPFRONT_PAYMENT", "POSSIBLE_IMPERSONATION", "HISTORICAL_REPORTS", "SUSPICIOUS_APPLICATION_URL", "SENSITIVE_INFORMATION_REQUEST"], RiskLevel.CRITICAL),
+    ]
+    for signal_types, expected_level in cases:
+        selected = [
+            SuspiciousSignal(signal_type=signal_type, evidence=signal_type, confidence=100, reasoning="test")
+            for signal_type in signal_types
+        ]
+        result = RiskEngine.calculate_risk(JobExtraction(suspicious_signals=selected))
+        assert result["risk_level"] == expected_level
+
+
+def test_equivalent_extractions_have_identical_scores_across_input_sources():
+    extraction = JobExtraction(
+        suspicious_signals=[
+            SuspiciousSignal(signal_type="UPFRONT_PAYMENT", evidence="Pay $500", confidence=95, reasoning="Payment requested."),
+            SuspiciousSignal(signal_type="HIGH_PRESSURE_LANGUAGE", evidence="Respond today", confidence=95, reasoning="Urgency."),
+        ]
+    )
+
+    text_result = RiskEngine.calculate_risk(extraction)
+    image_result = RiskEngine.calculate_risk(extraction)
+    pdf_result = RiskEngine.calculate_risk(extraction)
+
+    assert (text_result["risk_score"], text_result["risk_level"]) == (image_result["risk_score"], image_result["risk_level"])
+    assert (text_result["risk_score"], text_result["risk_level"]) == (pdf_result["risk_score"], pdf_result["risk_level"])
+

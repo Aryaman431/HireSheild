@@ -1,4 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 from app.models.embedding import Embedding, ReferenceType
 from app.models.job_posting import JobPosting
 from .provider import EmbeddingProvider
@@ -29,7 +30,7 @@ class EmbeddingService:
             parts.append(f"LOCATION:\n{job.location}")
             
         if signals:
-            sig_list = "\n".join([s.signal_type.value for s in signals])
+            sig_list = "\n".join([getattr(s.signal_type, "value", s.signal_type) for s in signals])
             parts.append(f"RISK SIGNALS:\n{sig_list}")
             
             # Add top evidence securely (avoiding PII, focusing on mechanics)
@@ -51,12 +52,22 @@ class EmbeddingService:
             semantic_text = self.construct_job_text(job, signals, company_name)
             vector = await self.provider.embed_text(semantic_text)
             
-            emb = Embedding(
-                reference_id=job.id,
-                reference_type=ReferenceType.JOB,
-                vector=vector
+            result = await self.db.execute(
+                select(Embedding).where(
+                    Embedding.reference_id == job.id,
+                    Embedding.reference_type == ReferenceType.JOB,
+                )
             )
-            self.db.add(emb)
+            emb = result.scalar_one_or_none()
+            if emb:
+                emb.vector = vector
+            else:
+                emb = Embedding(
+                    reference_id=job.id,
+                    reference_type=ReferenceType.JOB,
+                    vector=vector
+                )
+                self.db.add(emb)
             await self.db.flush()
             return emb.id
             

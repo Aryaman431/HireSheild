@@ -1,5 +1,6 @@
 import pytest
 from httpx import AsyncClient
+from app.models.company import Company
 
 @pytest.mark.asyncio
 async def test_get_community_feed(async_client: AsyncClient, override_auth):
@@ -10,9 +11,39 @@ async def test_get_community_feed(async_client: AsyncClient, override_auth):
     assert "reports" in data
     assert "total" in data
 
+
 @pytest.mark.asyncio
-async def test_create_and_moderate_report(async_client: AsyncClient, override_auth):
+async def test_community_feed_is_public(async_client: AsyncClient):
+    response = await async_client.get("/api/v1/community")
+    assert response.status_code == 200
+
+
+@pytest.mark.asyncio
+async def test_report_creation_requires_authentication(async_client: AsyncClient):
+    response = await async_client.post("/api/v1/reports", json={
+        "reason": "PHISHING",
+        "description": "This report should require an authenticated user.",
+        "company_id": "missing-company",
+    })
+    assert response.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_report_creation_rejects_invalid_entity(async_client: AsyncClient, override_auth):
+    override_auth("reporter_invalid_entity")
+    response = await async_client.post("/api/v1/reports", json={
+        "reason": "PHISHING",
+        "description": "This report references a missing company.",
+        "company_id": "missing-company",
+    })
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Referenced company was not found."
+
+@pytest.mark.asyncio
+async def test_create_and_moderate_report(async_client: AsyncClient, override_auth, db_session):
     override_auth("user_123")
+    db_session.add(Company(id="00000000-0000-0000-0000-000000000000", name="Acme", normalized_name="acme"))
+    await db_session.commit()
     
     # 1. Create Report
     response = await async_client.post("/api/v1/reports", json={
@@ -43,8 +74,10 @@ async def test_create_and_moderate_report(async_client: AsyncClient, override_au
     assert len([r for r in feed2["reports"] if r["id"] == report["id"]]) == 1
 
 @pytest.mark.asyncio
-async def test_community_intelligence_privacy(async_client: AsyncClient, override_auth):
+async def test_community_intelligence_privacy(async_client: AsyncClient, override_auth, db_session):
     override_auth("user_123")
+    db_session.add(Company(id="00000000-0000-0000-0000-000000000000", name="Acme", normalized_name="acme"))
+    await db_session.commit()
     
     # Create report
     create_resp = await async_client.post("/api/v1/reports", json={
@@ -68,3 +101,6 @@ async def test_community_intelligence_privacy(async_client: AsyncClient, overrid
     assert "reporter" not in data
     assert "reason" in data
     assert "confirmations" in data
+    assert data["company_id"] is None
+    assert data["recruiter_id"] is None
+    assert data["job_posting_id"] is None

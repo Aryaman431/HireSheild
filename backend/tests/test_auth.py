@@ -25,6 +25,7 @@ def test_get_jwt_payload_invalid():
         with pytest.raises(HTTPException) as exc:
             get_jwt_payload(creds)
         assert exc.value.status_code == 401
+        assert exc.value.detail == "Invalid authentication token"
 
 def test_get_jwt_payload_expired():
     with patch("app.auth.dependencies.decode_clerk_jwt") as mock_decode:
@@ -40,6 +41,27 @@ def test_get_jwt_payload_missing():
         get_jwt_payload(None)
     assert exc.value.status_code == 401
     assert exc.value.detail == "Invalid authentication credentials"
+
+
+def test_decode_clerk_jwt_requires_core_claims(monkeypatch):
+    from app.auth import dependencies
+
+    monkeypatch.setattr(dependencies, "jwks_client", MagicMock())
+    dependencies.jwks_client.get_signing_key_from_jwt.return_value.key = "public-key"
+    with patch("app.auth.dependencies.jwt.decode", side_effect=jwt.MissingRequiredClaimError("exp")):
+        with pytest.raises(jwt.InvalidTokenError):
+            dependencies.decode_clerk_jwt("token")
+
+
+def test_decode_clerk_jwt_uses_configured_issuer(monkeypatch):
+    from app.auth import dependencies
+
+    monkeypatch.setattr(dependencies, "jwks_client", MagicMock())
+    dependencies.jwks_client.get_signing_key_from_jwt.return_value.key = "public-key"
+    monkeypatch.setattr(settings, "CLERK_ISSUER_URL", "https://issuer.example.com")
+    with patch("app.auth.dependencies.jwt.decode", return_value={"sub": "user", "exp": 2, "iat": 1}) as decode:
+        dependencies.decode_clerk_jwt("token")
+    assert decode.call_args.kwargs["issuer"] == "https://issuer.example.com"
 
 def test_get_current_user_id():
     user_id = get_current_user_id({"sub": "user-uuid-1234"})

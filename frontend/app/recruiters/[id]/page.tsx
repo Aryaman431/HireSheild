@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server"
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import RiskVisualization from '@/components/RiskVisualization'
+import { getServerApiUrl } from '@/lib/api'
 
 interface VerificationCheck {
   id: string
@@ -18,7 +19,7 @@ async function getRecruiterIntelligence(id: string) {
   }
   const token = await getToken()
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+  const apiUrl = getServerApiUrl()
   const response = await fetch(`${apiUrl}/api/v1/recruiters/${id}`, {
     headers: {
       ...(token && { 'Authorization': `Bearer ${token}` })
@@ -32,8 +33,9 @@ async function getRecruiterIntelligence(id: string) {
   return await response.json()
 }
 
-export default async function RecruiterDossierPage({ params }: { params: { id: string } }) {
-  const recruiter = await getRecruiterIntelligence(params.id)
+export default async function RecruiterDossierPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const recruiter = await getRecruiterIntelligence(id)
 
   if (!recruiter) {
     redirect('/dashboard')

@@ -4,15 +4,15 @@ export default function RiskVisualization({ score, level, confidence }: { score:
   
   const scoreColor = isHighRisk 
     ? 'text-risk-critical' 
-    : isModerateRisk ? 'text-risk-moderate' : 'text-risk-low'
+    : isModerateRisk ? 'text-risk-suspicious' : 'text-risk-low'
 
   const barColor = isHighRisk 
     ? 'bg-risk-critical' 
-    : isModerateRisk ? 'bg-risk-moderate' : 'bg-risk-low'
+    : isModerateRisk ? 'bg-risk-suspicious' : 'bg-risk-low'
 
   return (
-    <div className="panel p-8 flex flex-col items-center justify-center text-center space-y-6">
-      <h2 className="tech-label text-slate-400 m-0 border-b border-surface-elevated pb-2 w-full">RISK ASSESSMENT</h2>
+    <div className="panel flex flex-col items-center justify-center space-y-6 p-7 text-center">
+      <h2 className="tech-label m-0 w-full border-b border-surface-elevated pb-3 text-slate-400">Risk assessment</h2>
       
       <div className="flex flex-col items-center justify-center pt-4">
         <div className={`text-7xl font-light tracking-tighter ${scoreColor} leading-none`}>
@@ -25,7 +25,7 @@ export default function RiskVisualization({ score, level, confidence }: { score:
         {level}
       </div>
 
-      <div className="w-full max-w-xs mt-2 relative h-1.5 bg-surface-elevated rounded-full overflow-hidden">
+      <div className="relative mt-2 h-2 w-full max-w-xs overflow-hidden rounded-full bg-surface-elevated">
         <div className={`absolute top-0 left-0 h-full ${barColor}`} style={{ width: `${score}%` }} />
       </div>
 

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { getBrowserApiUrl } from '@/lib/api'
 
 interface Props {
   jobId: string
@@ -23,7 +24,7 @@ export default function ReportOpportunityForm({ jobId, companyId, recruiterId, a
     setSubmitting(true)
     setErrorMsg('')
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+    const apiUrl = getBrowserApiUrl()
     const payload = {
       job_posting_id: jobId,
       company_id: companyId || null,

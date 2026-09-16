@@ -45,3 +45,26 @@ async def test_admin_moderation_unauthorized(auth_client: AsyncClient):
     # The current auth_client mock in conftest doesn't set is_admin=False explicitly, but by default it is False
     assert response.status_code == 403
     assert response.json()["detail"] == "Insufficient permissions. Admin access required."
+
+
+@pytest.mark.asyncio
+async def test_cors_allows_configured_frontend_and_rejects_other_origin(async_client: AsyncClient):
+    allowed = await async_client.options(
+        "/api/v1/jobs/analyze",
+        headers={
+            "Origin": "http://localhost:3000",
+            "Access-Control-Request-Method": "POST",
+            "Access-Control-Request-Headers": "authorization,content-type",
+        },
+    )
+    assert allowed.status_code == 200
+    assert allowed.headers["access-control-allow-origin"] == "http://localhost:3000"
+
+    denied = await async_client.options(
+        "/api/v1/jobs/analyze",
+        headers={
+            "Origin": "http://evil.example",
+            "Access-Control-Request-Method": "POST",
+        },
+    )
+    assert "access-control-allow-origin" not in denied.headers

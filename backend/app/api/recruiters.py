@@ -45,45 +45,42 @@ async def get_recruiter(
     jobs = []
     high_risk_count = 0
     signal_counts = {}
-    
+
     for job in recruiter.jobs:
         if job.risk_level in [RiskLevel.HIGH, RiskLevel.CRITICAL]:
             high_risk_count += 1
-            
+
         for sig in job.risk_signals:
             signal_counts[sig.signal_type.value] = signal_counts.get(sig.signal_type.value, 0) + 1
-            
+
         jobs.append({
-            "id": job.id,
-            "title": job.title,
             "risk_score": job.risk_score,
-            "risk_level": job.risk_level.value if job.risk_level else "UNKNOWN"
+            "risk_level": getattr(job.risk_level, 'value', job.risk_level) if job.risk_level else "UNKNOWN"
         })
-        
+
     common_signals = [sig for sig, count in signal_counts.items() if count > 0]
-        
-    # Build a careful summary message
+
     job_count = len(recruiter.jobs)
     activity_summary = f"This contact is associated with {job_count} analyzed opportunit{'y' if job_count == 1 else 'ies'}."
-    
+
     if recruiter.risk_score and recruiter.risk_score > 60:
         activity_summary = f"This contact has appeared in multiple opportunities with reported risk signals. Exercise caution."
-        
+
     return {
         "id": recruiter.id,
         "name": recruiter.name,
-        "email": recruiter.email,
-        "phone": recruiter.phone,
+        "email": None,
+        "phone": None,
         "company": {
             "id": recruiter.company.id,
             "name": recruiter.company.name
         } if recruiter.company else None,
-        "verification_status": recruiter.verification_status.value if recruiter.verification_status else "UNVERIFIED",
+        "verification_status": getattr(recruiter.verification_status, 'value', recruiter.verification_status) if recruiter.verification_status else "UNVERIFIED",
         "verification_checks": [
             {
                 "id": c.id,
-                "check_type": c.check_type.value,
-                "result": c.result.value,
+                "check_type": getattr(c.check_type, 'value', c.check_type),
+                "result": getattr(c.result, 'value', c.result),
                 "evidence": c.evidence,
                 "checked_at": c.checked_at.isoformat() if c.checked_at else None
             }
@@ -94,6 +91,7 @@ async def get_recruiter(
         "historical_opportunities_count": job_count,
         "high_risk_opportunities_count": high_risk_count,
         "recurring_risk_signals": common_signals,
-        "related_jobs": jobs,
-        "reports": [] # Phase 9 placeholder
+        "related_jobs": [],
+        "related_jobs_count": len(jobs),
+        "reports": []
     }

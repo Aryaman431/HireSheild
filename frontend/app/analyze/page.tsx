@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@clerk/nextjs'
+import { getBrowserApiUrl } from '@/lib/api'
 
 const LOADING_STAGES = [
   "VALIDATING SOURCE",
@@ -101,7 +102,7 @@ export default function AnalyzePage() {
         throw new Error("Authentication session expired.")
       }
 
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+      const apiUrl = getBrowserApiUrl()
       
       let response;
       
@@ -129,7 +130,12 @@ export default function AnalyzePage() {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.detail || "Analysis failed on the server.")
+        const message = response.status === 401
+          ? "Your session expired. Please sign in again."
+          : response.status >= 500
+            ? "The analysis service is temporarily unavailable."
+            : errorData.detail || "Analysis failed on the server."
+        throw new Error(message)
       }
 
       const data = await response.json()
@@ -140,7 +146,9 @@ export default function AnalyzePage() {
     } catch (err) {
       const error = err as Error
       clearInterval(stageInterval)
-      setError(error.message || "An unexpected error occurred during analysis.")
+      setError(error.name === 'TypeError'
+        ? "Unable to reach the analysis service. Please make sure the backend is running."
+        : error.message || "An unexpected error occurred during analysis.")
       setIsAnalyzing(false)
       setLoadingStage(0)
     }
@@ -148,8 +156,8 @@ export default function AnalyzePage() {
 
   if (isAnalyzing) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-6">
-        <div className="w-full max-w-lg panel p-8 flex flex-col gap-8">
+      <div className="app-page flex items-center justify-center">
+        <div className="panel flex w-full max-w-lg flex-col gap-8 p-8">
           <div className="flex items-center justify-between border-b border-surface-elevated pb-4">
             <h2 className="tech-label m-0 text-brand-400 animate-pulse">SYSTEM PROCESSING</h2>
             <span className="text-xs font-mono text-slate-500">ID: PENDING</span>
@@ -180,14 +188,21 @@ export default function AnalyzePage() {
   }
 
   return (
-    <div className="flex-1 p-8">
-      <div className="max-w-4xl mx-auto space-y-8">
-        <header className="border-b border-surface-elevated pb-6">
-          <h1 className="text-3xl font-light tracking-wide uppercase text-brand-100">Initiate Investigation</h1>
-          <p className="text-slate-400 text-sm mt-2">Submit recruitment materials for automated AI risk extraction and deterministic verification.</p>
+    <div className="app-page">
+      <div className="page-wrap max-w-4xl">
+        <header className="page-heading">
+          <div>
+            <p className="eyebrow">New investigation</p>
+            <h1 className="text-3xl font-light tracking-wide text-white sm:text-4xl">Check an opportunity before you engage.</h1>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">Submit a job post, recruiter email, or document. We’ll surface claims, verification evidence, and meaningful risk signals.</p>
+          </div>
+          <div className="hidden rounded-lg border border-surface-elevated bg-slate-900/50 px-4 py-3 text-right sm:block">
+            <p className="text-[10px] font-mono uppercase tracking-widest text-slate-500">Source privacy</p>
+            <p className="mt-1 text-xs font-mono text-brand-300">Protected analysis</p>
+          </div>
         </header>
 
-        <div className="flex space-x-1 border-b border-surface-elevated">
+        <div className="inline-flex w-full gap-1 rounded-xl border border-surface-elevated/80 bg-slate-900/50 p-1 sm:w-auto">
           {(['TEXT', 'IMAGE', 'PDF'] as const).map(tab => (
             <button
               key={tab}
@@ -197,10 +212,10 @@ export default function AnalyzePage() {
                 setError(null)
                 setFile(null)
               }}
-              className={`px-4 py-3 text-sm font-mono transition-colors ${
+              className={`flex-1 rounded-lg px-5 py-2.5 text-sm font-mono transition ${
                 activeTab === tab 
-                  ? 'text-brand-400 border-b-2 border-brand-500' 
-                  : 'text-slate-500 hover:text-slate-300'
+                  ? 'bg-brand-500/15 text-brand-300 shadow-sm ring-1 ring-brand-400/20'
+                  : 'text-slate-500 hover:bg-surface-raised hover:text-slate-300'
               }`}
             >
               [ {tab} ]
@@ -208,7 +223,7 @@ export default function AnalyzePage() {
           ))}
         </div>
 
-        <div className="panel p-6">
+        <div className="panel p-5 sm:p-7">
           <form onSubmit={handleAnalyze} className="flex flex-col gap-6">
             
             {activeTab === 'TEXT' && (
@@ -221,7 +236,7 @@ export default function AnalyzePage() {
                   id="job-text"
                   value={text}
                   onChange={(e) => setText(e.target.value)}
-                  className="bg-slate-900 border border-surface-elevated rounded p-4 text-sm text-slate-300 font-mono focus:outline-none focus:border-brand-500 transition-colors h-64 resize-y"
+                  className="input-field h-64 resize-y font-mono leading-6"
                   placeholder="Paste the email, LinkedIn message, or job description here..."
                   required
                 />
@@ -235,8 +250,8 @@ export default function AnalyzePage() {
                 <div 
                   onDragOver={handleDragOver}
                   onDrop={handleDrop}
-                  className={`border-2 border-dashed rounded-lg p-12 text-center transition-colors ${
-                    file ? 'border-brand-500/50 bg-brand-500/5' : 'border-surface-elevated hover:border-slate-600 hover:bg-slate-900/50'
+                  className={`rounded-xl border-2 border-dashed p-10 text-center transition-colors sm:p-14 ${
+                    file ? 'border-brand-500/50 bg-brand-500/5' : 'border-surface-elevated hover:border-brand-500/40 hover:bg-slate-900/50'
                   }`}
                 >
                   <input 
@@ -279,8 +294,9 @@ export default function AnalyzePage() {
               </div>
             )}
 
-            <div className="flex justify-end">
-              <button type="submit" className="btn-primary flex items-center gap-2">
+            <div className="flex flex-col-reverse gap-3 border-t border-surface-elevated/70 pt-5 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-xs leading-5 text-slate-500">Analysis is evidence-led. Never share a password or banking details.</p>
+              <button type="submit" className="btn-primary flex shrink-0 items-center justify-center gap-2">
                 <span>INITIATE ANALYSIS</span>
                 <span className="text-brand-700">→</span>
               </button>

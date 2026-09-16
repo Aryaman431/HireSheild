@@ -6,19 +6,19 @@ export default async function Navigation() {
   const { userId } = await auth()
 
   return (
-    <header className="border-b border-surface-elevated bg-slate-950/80 backdrop-blur-md sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
+    <header className="sticky top-0 z-50 border-b border-surface-elevated/80 bg-slate-950/85 backdrop-blur-xl">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:px-8">
         <div className="flex items-center gap-3">
-          <div className="w-6 h-6 rounded bg-brand-500/10 border border-brand-500/30 flex items-center justify-center">
-            <span className="font-mono font-bold text-brand-500 text-xs">H</span>
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-brand-400/40 bg-brand-500/15 shadow-[0_0_18px_rgba(59,130,246,0.16)]">
+            <span className="font-mono text-sm font-bold text-brand-300">H</span>
           </div>
-          <Link href="/" className="font-mono font-bold tracking-widest text-sm uppercase text-brand-100 hover:text-brand-300 transition-colors">HireShield</Link>
+          <Link href="/" className="font-mono text-sm font-bold uppercase tracking-[0.16em] text-slate-100 transition-colors hover:text-brand-300">HireShield</Link>
         </div>
         
-        <nav className="hidden md:flex items-center gap-6">
-          <Link href="/analyze" className="text-xs font-mono uppercase tracking-widest text-slate-400 hover:text-brand-400 transition-colors">Analyze</Link>
-          <Link href="/dashboard" className="text-xs font-mono uppercase tracking-widest text-slate-400 hover:text-brand-400 transition-colors">Dashboard</Link>
-          <Link href="/community" className="text-xs font-mono uppercase tracking-widest text-slate-400 hover:text-brand-400 transition-colors">Community</Link>
+        <nav className="hidden items-center gap-1 rounded-lg border border-surface-elevated/60 bg-slate-900/40 p-1 md:flex">
+          <Link href="/analyze" className="rounded-md px-3 py-1.5 text-[11px] font-mono uppercase tracking-wider text-slate-400 transition hover:bg-surface-raised hover:text-brand-300">Analyze</Link>
+          <Link href="/dashboard" className="rounded-md px-3 py-1.5 text-[11px] font-mono uppercase tracking-wider text-slate-400 transition hover:bg-surface-raised hover:text-brand-300">Dashboard</Link>
+          <Link href="/community" className="rounded-md px-3 py-1.5 text-[11px] font-mono uppercase tracking-wider text-slate-400 transition hover:bg-surface-raised hover:text-brand-300">Community</Link>
         </nav>
 
         <div className="flex items-center gap-4">
@@ -32,7 +32,7 @@ export default async function Navigation() {
                 <button className="text-xs font-mono uppercase tracking-widest text-slate-400 hover:text-slate-200">Log In</button>
               </SignInButton>
               <SignUpButton mode="modal">
-                <button className="text-[10px] font-mono font-bold uppercase tracking-widest bg-brand-500 text-slate-950 px-3 py-1 rounded hover:bg-brand-400 transition-colors">Initialize</button>
+                <button className="rounded-md bg-brand-500 px-3 py-1.5 text-[10px] font-mono font-bold uppercase tracking-widest text-white transition-colors hover:bg-brand-400">Get started</button>
               </SignUpButton>
             </div>
           )}

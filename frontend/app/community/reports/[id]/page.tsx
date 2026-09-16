@@ -4,11 +4,11 @@ import { useEffect, useState } from 'react'
 import { useAuth } from '@clerk/nextjs'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { getBrowserApiUrl } from '@/lib/api'
 
 export default function ReportDetailPage() {
   const params = useParams()
   const router = useRouter()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [report, setReport] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [confirming, setConfirming] = useState(false)
@@ -24,7 +24,7 @@ export default function ReportDetailPage() {
       }
 
       const token = await getToken()
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+      const apiUrl = getBrowserApiUrl()
       const response = await fetch(`${apiUrl}/api/v1/community/reports/${params.id}`, {
         headers: {
           ...(token && { 'Authorization': `Bearer ${token}` })
@@ -44,7 +44,7 @@ export default function ReportDetailPage() {
     if (!isSignedIn) return
     setConfirming(true)
     const token = await getToken()
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+    const apiUrl = getBrowserApiUrl()
     const res = await fetch(`${apiUrl}/api/v1/community/reports/${params.id}/confirm`, {
       method: 'POST',
       headers: {

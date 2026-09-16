@@ -1,4 +1,4 @@
-from sqlalchemy import String, Enum
+from sqlalchemy import String, Enum, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 from pgvector.sqlalchemy import Vector
 from .base import Base, TimestampMixin, generate_uuid
@@ -19,4 +19,8 @@ class Embedding(Base, TimestampMixin):
     reference_type: Mapped[ReferenceType] = mapped_column(Enum(ReferenceType), index=True)
     
     # We will use Gemini's text-embedding-004 model (768 dimensions)
-    vector: Mapped[list[float] | None] = mapped_column(Vector(768), nullable=True)
+    vector: Mapped[list[float]] = mapped_column(Vector(768), nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint("reference_type", "reference_id", name="uq_embedding_reference"),
+    )

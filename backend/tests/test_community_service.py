@@ -13,8 +13,8 @@ from app.services.community_service import CommunityService
 @pytest_asyncio.fixture
 async def users(db_session: AsyncSession):
     import uuid
-    u1 = User(email=f"rep1_{uuid.uuid4()}@test.com", auth_provider="supabase", name="Reporter", id=f"uid1_{uuid.uuid4()}")
-    u2 = User(email=f"rep2_{uuid.uuid4()}@test.com", auth_provider="supabase", name="Reporter", id=f"uid2_{uuid.uuid4()}")
+    u1 = User(email=f"rep1_{uuid.uuid4()}@test.com", auth_provider="clerk", name="Reporter", id=f"uid1_{uuid.uuid4()}")
+    u2 = User(email=f"rep2_{uuid.uuid4()}@test.com", auth_provider="clerk", name="Reporter", id=f"uid2_{uuid.uuid4()}")
     db_session.add_all([u1, u2])
     await db_session.commit()
     await db_session.refresh(u1)
@@ -59,6 +59,12 @@ async def test_add_confirmation_success_and_upsert(db_session: AsyncSession, rep
     conf2 = await CommunityService.add_confirmation(db_session, report.id, u2.id, ConfirmationResponse.DID_NOT_HAPPEN_TO_ME)
     assert conf2.id == conf1.id
     assert conf2.response == ConfirmationResponse.DID_NOT_HAPPEN_TO_ME
+
+    intelligence = await CommunityService.get_report_intelligence(db_session, report.id)
+    assert intelligence["confirmations"] == {
+        "happened_to_me": 0,
+        "did_not_happen_to_me": 1,
+    }
 
 @pytest.mark.asyncio
 async def test_get_approved_reports(db_session: AsyncSession, report: Report, users):

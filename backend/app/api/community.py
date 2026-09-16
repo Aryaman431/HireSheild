@@ -17,7 +17,6 @@ async def get_community_feed(
     request: Request,
     page: int = 1,
     limit: int = 20,
-    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -45,9 +44,9 @@ async def get_report_intelligence(
     report = intel["report"]
     return {
         "id": report.id,
-        "company_id": report.company_id,
-        "recruiter_id": report.recruiter_id,
-        "job_posting_id": report.job_posting_id,
+        "company_id": None,
+        "recruiter_id": None,
+        "job_posting_id": None,
         "reason": report.reason,
         "description": report.description,
         "evidence": report.evidence,
