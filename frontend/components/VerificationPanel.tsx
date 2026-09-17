@@ -110,9 +110,9 @@ export default function VerificationPanel({ jobId, accessToken }: { jobId: strin
   const lastChecked = hasChecks ? new Date(data.checks[0].checked_at).toLocaleString() : 'Never'
 
   return (
-    <div className="panel p-6 border-brand-500/30 relative">
+    <div className="panel p-6 border-surface-elevated relative">
       <div className="flex justify-between items-center mb-6 border-b border-surface-elevated pb-2">
-        <h2 className="tech-label text-brand-500 m-0">INDEPENDENT VERIFICATION</h2>
+        <h2 className="tech-label text-slate-500 m-0">INDEPENDENT VERIFICATION</h2>
         <div className="flex items-center gap-4">
           <span className="text-xs text-slate-500 font-mono">LAST CHECKED: {lastChecked}</span>
           <button 
@@ -126,7 +126,7 @@ export default function VerificationPanel({ jobId, accessToken }: { jobId: strin
       </div>
 
       {error && (
-        <div className="mb-4 p-3 bg-risk-critical/10 border border-risk-critical/30 rounded text-risk-critical text-sm font-mono">
+        <div className="mb-4 p-3 bg-surface-elevated border border-surface-raised rounded-sm text-risk-critical text-sm font-mono">
           [SYSTEM_ERROR]: {error}
         </div>
       )}
@@ -143,7 +143,7 @@ export default function VerificationPanel({ jobId, accessToken }: { jobId: strin
             <h3 className="text-xs font-bold text-slate-500 mb-2 uppercase tracking-widest">Company Domain Checks</h3>
             <ul className="space-y-2">
               {companyChecks.map((c: Check) => (
-                <li key={c.id} className="text-sm font-mono flex items-start gap-4 p-3 bg-surface border border-surface-elevated rounded">
+                <li key={c.id} className="text-sm font-mono flex items-start gap-4 p-3 bg-surface-raised/30 border border-surface-elevated rounded-sm">
                   <span className={`badge ${getResultBadgeClass(c.result)}`}>{getResultIcon(c.result)}</span>
                   <div>
                     <div className="font-bold text-slate-200 tracking-wide text-xs mb-1">{c.check_type.replace(/_/g, ' ')}</div>
@@ -160,7 +160,7 @@ export default function VerificationPanel({ jobId, accessToken }: { jobId: strin
             <h3 className="text-xs font-bold text-slate-500 mb-2 uppercase tracking-widest">Recruiter Identity Checks</h3>
             <ul className="space-y-2">
               {recruiterChecks.map((c: Check) => (
-                <li key={c.id} className="text-sm font-mono flex items-start gap-4 p-3 bg-surface border border-surface-elevated rounded">
+                <li key={c.id} className="text-sm font-mono flex items-start gap-4 p-3 bg-surface-raised/30 border border-surface-elevated rounded-sm">
                   <span className={`badge ${getResultBadgeClass(c.result)}`}>{getResultIcon(c.result)}</span>
                   <div>
                     <div className="font-bold text-slate-200 tracking-wide text-xs mb-1">{c.check_type.replace(/_/g, ' ')}</div>
@@ -177,7 +177,7 @@ export default function VerificationPanel({ jobId, accessToken }: { jobId: strin
             <h3 className="text-xs font-bold text-slate-500 mb-2 uppercase tracking-widest">Application URL Checks</h3>
             <ul className="space-y-2">
               {jobChecks.map((c: Check) => (
-                <li key={c.id} className="text-sm font-mono flex items-start gap-4 p-3 bg-surface border border-surface-elevated rounded">
+                <li key={c.id} className="text-sm font-mono flex items-start gap-4 p-3 bg-surface-raised/30 border border-surface-elevated rounded-sm">
                   <span className={`badge ${getResultBadgeClass(c.result)}`}>{getResultIcon(c.result)}</span>
                   <div>
                     <div className="font-bold text-slate-200 tracking-wide text-xs mb-1">{c.check_type.replace(/_/g, ' ')}</div>

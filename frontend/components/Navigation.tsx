@@ -1,43 +1,102 @@
-import Link from "next/link"
-import { UserButton, SignInButton, SignUpButton } from "@clerk/nextjs"
-import { auth } from "@clerk/nextjs/server"
+'use client'
 
-export default async function Navigation() {
-  const { userId } = await auth()
+import Link from 'next/link'
+import { UserButton, SignInButton, SignUpButton } from '@clerk/nextjs'
+import { useEffect, useState } from 'react'
+import { motion, useReducedMotion } from 'framer-motion'
+import { Shield } from 'lucide-react'
+
+export default function Navigation({ userId }: { userId: string | null }) {
+  const [scrolled, setScrolled] = useState(false)
+  const prefersReduced = useReducedMotion()
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 10)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   return (
-    <header className="sticky top-0 z-50 border-b border-surface-elevated/80 bg-slate-950/85 backdrop-blur-xl">
+    <header
+      className="sticky top-0 z-50 border-b transition-all duration-300"
+      style={{
+        borderColor: scrolled ? 'rgba(51,65,85,0.8)' : 'rgba(51,65,85,0.4)',
+        backgroundColor: scrolled ? 'rgba(2,6,23,0.85)' : 'rgba(2,6,23,0.0)',
+        backdropFilter: scrolled ? 'blur(18px) saturate(140%)' : 'none',
+        WebkitBackdropFilter: scrolled ? 'blur(18px) saturate(140%)' : 'none',
+      }}
+    >
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:px-8">
+        {/* Logo */}
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-brand-400/40 bg-brand-500/15 shadow-[0_0_18px_rgba(59,130,246,0.16)]">
-            <span className="font-mono text-sm font-bold text-brand-300">H</span>
-          </div>
-          <Link href="/" className="font-mono text-sm font-bold uppercase tracking-[0.16em] text-slate-100 transition-colors hover:text-brand-300">HireShield</Link>
+          <motion.div
+            className="flex h-8 w-8 items-center justify-center rounded-sm border border-surface-elevated bg-surface"
+            animate={prefersReduced ? {} : {
+              boxShadow: [
+                '0 0 0px rgba(148,163,184,0)',
+                '0 0 8px rgba(148,163,184,0.12)',
+                '0 0 0px rgba(148,163,184,0)',
+              ],
+            }}
+            transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
+          >
+            <Shield size={14} className="text-slate-400" strokeWidth={1.5} />
+          </motion.div>
+          <Link
+            href="/"
+            className="font-mono text-sm font-bold uppercase tracking-[0.16em] text-slate-100 transition-colors hover:text-slate-300"
+          >
+            HireShield
+          </Link>
         </div>
-        
-        <nav className="hidden items-center gap-1 rounded-lg border border-surface-elevated/60 bg-slate-900/40 p-1 md:flex">
-          <Link href="/analyze" className="rounded-md px-3 py-1.5 text-[11px] font-mono uppercase tracking-wider text-slate-400 transition hover:bg-surface-raised hover:text-brand-300">Analyze</Link>
-          <Link href="/dashboard" className="rounded-md px-3 py-1.5 text-[11px] font-mono uppercase tracking-wider text-slate-400 transition hover:bg-surface-raised hover:text-brand-300">Dashboard</Link>
-          <Link href="/community" className="rounded-md px-3 py-1.5 text-[11px] font-mono uppercase tracking-wider text-slate-400 transition hover:bg-surface-raised hover:text-brand-300">Community</Link>
+
+        {/* Nav links */}
+        <nav className="hidden items-center gap-1 rounded-sm border border-surface-elevated bg-surface p-1 md:flex">
+          {[
+            { href: '/analyze', label: 'Analyze' },
+            { href: '/dashboard', label: 'Dashboard' },
+            { href: '/community', label: 'Community' },
+          ].map((link) => (
+            <NavLink key={link.href} href={link.href} label={link.label} />
+          ))}
         </nav>
 
+        {/* Auth */}
         <div className="flex items-center gap-4">
           {userId ? (
-            <div className="flex items-center gap-4">
-              <UserButton />
-            </div>
+            <UserButton />
           ) : (
             <div className="flex items-center gap-4">
               <SignInButton mode="modal">
-                <button className="text-xs font-mono uppercase tracking-widest text-slate-400 hover:text-slate-200">Log In</button>
+                <button className="text-xs font-mono uppercase tracking-widest text-slate-400 hover:text-slate-200 transition-colors">
+                  Log In
+                </button>
               </SignInButton>
               <SignUpButton mode="modal">
-                <button className="rounded-md bg-brand-500 px-3 py-1.5 text-[10px] font-mono font-bold uppercase tracking-widest text-white transition-colors hover:bg-brand-400">Get started</button>
+                <button className="rounded-sm bg-surface-elevated px-3 py-1.5 text-[10px] font-mono font-bold uppercase tracking-widest text-slate-300 transition-colors hover:bg-slate-800">
+                  Get Started
+                </button>
               </SignUpButton>
             </div>
           )}
         </div>
       </div>
     </header>
+  )
+}
+
+function NavLink({ href, label }: { href: string; label: string }) {
+  return (
+    <Link
+      href={href}
+      className="group relative rounded-sm px-3 py-1.5 text-[11px] font-mono uppercase tracking-wider text-slate-400 transition-colors hover:bg-surface-raised hover:text-slate-200"
+    >
+      {label}
+      {/* Underline draw-in */}
+      <span
+        aria-hidden="true"
+        className="absolute bottom-0.5 left-3 right-3 h-px bg-slate-400 scale-x-0 origin-left transition-transform duration-200 group-hover:scale-x-100"
+      />
+    </Link>
   )
 }

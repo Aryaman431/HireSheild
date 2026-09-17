@@ -67,7 +67,7 @@ export default async function RecruiterDossierPage({ params }: { params: Promise
       <div className="max-w-4xl mx-auto space-y-8">
         <header className="border-b border-surface-elevated pb-6 flex justify-between items-end">
           <div>
-            <h1 className="text-3xl font-light tracking-wide uppercase text-brand-100">RECRUITER DOSSIER</h1>
+            <h1 className="text-3xl font-light tracking-wide uppercase text-slate-100">RECRUITER DOSSIER</h1>
             <p className="text-slate-400 font-mono text-xs mt-2">ID: {recruiter.id}</p>
           </div>
           <Link href="/analyze" className="btn-ghost text-sm border border-surface-elevated">← NEW ANALYSIS</Link>
@@ -78,8 +78,8 @@ export default async function RecruiterDossierPage({ params }: { params: Promise
             <RiskVisualization score={recruiter.risk_score || 0} level={isHighRisk ? 'HIGH RISK CONTACT' : isModerateRisk ? 'MODERATE RISK' : 'LOW RISK'} confidence={90} />
           </div>
 
-          <div className="md:col-span-2 panel p-0 border-brand-500/30">
-            <h2 className="tech-label text-brand-500 border-b border-surface-elevated p-6 mb-0">IDENTITY</h2>
+          <div className="md:col-span-2 panel p-0 border-surface-elevated">
+            <h2 className="tech-label text-slate-500 border-b border-surface-elevated p-6 mb-0">IDENTITY</h2>
             <div className="p-6 space-y-4 font-mono text-sm text-slate-300">
               <div className="grid grid-cols-3 gap-2 pb-4 border-b border-surface-elevated/50">
                 <span className="text-slate-500 uppercase tracking-widest text-xs">Name:</span>
@@ -87,13 +87,13 @@ export default async function RecruiterDossierPage({ params }: { params: Promise
               </div>
               <div className="grid grid-cols-3 gap-2 pb-4 border-b border-surface-elevated/50">
                 <span className="text-slate-500 uppercase tracking-widest text-xs">Email:</span>
-                <span className="col-span-2 text-brand-400">{recruiter.email || "Unknown"}</span>
+                <span className="col-span-2 text-slate-200">{recruiter.email || "Unknown"}</span>
               </div>
               <div className="grid grid-cols-3 gap-2 pb-4 border-b border-surface-elevated/50">
                 <span className="text-slate-500 uppercase tracking-widest text-xs">Associated Company:</span>
                 <span className="col-span-2 text-slate-200">
                   {recruiter.company ? (
-                    <Link href={`/companies/${recruiter.company.id}`} className="hover:text-brand-400 hover:underline">
+                    <Link href={`/companies/${recruiter.company.id}`} className="hover:text-slate-300 hover:underline">
                       {recruiter.company.name}
                     </Link>
                   ) : "Unknown"}
@@ -108,14 +108,14 @@ export default async function RecruiterDossierPage({ params }: { params: Promise
         </div>
 
         {/* Verification Checks Section */}
-        <div className="panel p-0 border-brand-500/30">
-          <h2 className="tech-label text-brand-500 border-b border-surface-elevated p-6 mb-0">VERIFICATION CHECKS</h2>
+        <div className="panel p-0 border-surface-elevated">
+          <h2 className="tech-label text-slate-500 border-b border-surface-elevated p-6 mb-0">VERIFICATION CHECKS</h2>
           {recruiter.verification_checks?.length === 0 ? (
             <p className="text-slate-400 font-mono text-sm p-6">No verification checks found.</p>
           ) : (
             <ul className="space-y-3 px-6 pb-6">
               {recruiter.verification_checks?.map((c: VerificationCheck) => (
-                <li key={c.id} className="text-sm font-mono flex items-start gap-4 p-3 bg-surface border border-surface-elevated rounded">
+                <li key={c.id} className="text-sm font-mono flex items-start gap-4 p-3 bg-surface border border-surface-elevated rounded-sm">
                   <span className={`badge ${c.result === 'VERIFIED' ? 'badge-verified' : c.result === 'SUSPICIOUS' ? 'badge-critical' : 'badge-suspicious'}`}>{getResultIcon(c.result)}</span>
                   <div>
                     <div className="font-bold text-slate-200 tracking-wide text-xs mb-1">{c.check_type?.replace(/_/g, ' ') || c.result}</div>
@@ -127,14 +127,14 @@ export default async function RecruiterDossierPage({ params }: { params: Promise
           )}
         </div>
 
-        <div className="panel p-6 border-brand-500/20">
-          <h2 className="tech-label text-brand-500 border-b border-surface-elevated pb-2 mb-4">
+        <div className="panel p-6 border-surface-elevated">
+          <h2 className="tech-label text-slate-500 border-b border-surface-elevated pb-2 mb-4">
             ACTIVITY SUMMARY
           </h2>
           <p className="text-slate-300 font-mono text-sm mb-6">{recruiter.activity_summary}</p>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div className="p-3 bg-surface-elevated border-l-2 border-brand-500/30">
+            <div className="p-3 bg-surface-elevated border-l-2 border-slate-500">
               <span className="block text-xs text-slate-500 mb-1">Total Opportunities</span>
               <span className="text-xl font-light text-slate-200">{recruiter.historical_opportunities_count}</span>
             </div>
@@ -156,8 +156,8 @@ export default async function RecruiterDossierPage({ params }: { params: Promise
           )}
         </div>
 
-        <div className="panel p-6 border-brand-500/20">
-          <h2 className="tech-label text-brand-500 border-b border-surface-elevated pb-2 mb-4">
+        <div className="panel p-6 border-surface-elevated">
+          <h2 className="tech-label text-slate-500 border-b border-surface-elevated pb-2 mb-4">
             ANALYZED OPPORTUNITIES ({recruiter.related_jobs.length})
           </h2>
           {recruiter.related_jobs.length === 0 ? (
@@ -165,8 +165,8 @@ export default async function RecruiterDossierPage({ params }: { params: Promise
           ) : (
             <ul className="space-y-3 font-mono text-xs">
               {recruiter.related_jobs.map((job: {id: string, title: string, risk_score: number}) => (
-                <li key={job.id} className="flex flex-col gap-1 border border-surface-elevated p-3 rounded bg-slate-900/50">
-                  <Link href={`/analyze/result/${job.id}`} className="text-brand-400 hover:underline truncate">
+                <li key={job.id} className="flex flex-col gap-1 border border-surface-elevated p-3 rounded-sm bg-surface-raised">
+                  <Link href={`/analyze/result/${job.id}`} className="text-slate-300 hover:underline truncate">
                     {job.title || "Untitled Job"}
                   </Link>
                   <span className="text-slate-500">Risk: {job.risk_score}/100</span>

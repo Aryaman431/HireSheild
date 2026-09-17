@@ -62,7 +62,7 @@ export default function ReportOpportunityForm({ jobId, companyId, recruiterId, a
     return (
       <button 
         onClick={() => setIsOpen(true)}
-        className="w-full mt-6 border border-risk-critical/50 text-risk-critical hover:bg-risk-critical/10 p-3 rounded font-mono text-sm tracking-wide transition-colors"
+        className="w-full mt-6 border border-risk-critical/50 text-risk-critical hover:bg-risk-critical/10 p-3 rounded-sm font-mono text-xs font-bold tracking-widest uppercase transition-colors"
       >
         REPORT THIS OPPORTUNITY
       </button>
@@ -82,13 +82,13 @@ export default function ReportOpportunityForm({ jobId, companyId, recruiterId, a
   }
 
   return (
-    <div className="w-full mt-6 border border-risk-critical/50 bg-slate-900 p-6 rounded">
+    <div className="w-full mt-6 border border-risk-critical/50 bg-surface p-6 rounded-sm">
       <div className="flex justify-between items-start mb-4">
         <h3 className="tech-label text-risk-critical border-b border-surface-elevated pb-1 w-full text-left">REPORT OPPORTUNITY</h3>
         <button onClick={() => setIsOpen(false)} className="text-slate-500 hover:text-slate-300 ml-4">✕</button>
       </div>
 
-      <p className="text-xs text-slate-400 font-mono mb-4 bg-surface p-2 border-l-2 border-brand-500">
+      <p className="text-xs text-slate-400 font-mono mb-4 bg-surface-raised p-2 border-l-2 border-slate-500">
         Reports are reviewed before being included in community intelligence.
       </p>
 
@@ -98,7 +98,7 @@ export default function ReportOpportunityForm({ jobId, companyId, recruiterId, a
           <select 
             value={reason} 
             onChange={e => setReason(e.target.value)}
-            className="w-full bg-slate-950 border border-surface-elevated text-slate-200 p-2 rounded"
+            className="w-full bg-surface-elevated border border-surface-raised text-slate-200 p-2 rounded-sm"
           >
             <option value="SUSPICIOUS_JOB">Suspicious Job</option>
             <option value="UPFRONT_PAYMENT">Upfront Payment Requested</option>
@@ -120,7 +120,7 @@ export default function ReportOpportunityForm({ jobId, companyId, recruiterId, a
             maxLength={2000}
             value={description}
             onChange={e => setDescription(e.target.value)}
-            className="w-full bg-slate-950 border border-surface-elevated text-slate-200 p-2 rounded h-24"
+            className="w-full bg-surface border border-surface-elevated text-slate-200 p-2 rounded-sm h-24"
             placeholder="Describe your experience..."
           />
         </div>
@@ -130,7 +130,7 @@ export default function ReportOpportunityForm({ jobId, companyId, recruiterId, a
           <textarea 
             value={evidence}
             onChange={e => setEvidence(e.target.value)}
-            className="w-full bg-slate-950 border border-surface-elevated text-slate-200 p-2 rounded h-20"
+            className="w-full bg-surface border border-surface-elevated text-slate-200 p-2 rounded-sm h-20"
             placeholder="Paste text evidence (emails, URLs, messages)"
           />
         </div>

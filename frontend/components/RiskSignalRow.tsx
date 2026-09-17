@@ -12,7 +12,7 @@ export default function RiskSignalRow({ signal }: { signal: any }) {
             {signal.type.replace(/_/g, ' ')}
           </span>
         </div>
-        <span className="font-mono text-risk-critical text-sm bg-risk-critical/10 px-2 py-0.5 rounded">
+        <span className="font-mono text-risk-critical text-sm bg-risk-critical/10 px-2 py-0.5 rounded-sm">
           +{signal.contribution}
         </span>
       </div>
@@ -22,9 +22,9 @@ export default function RiskSignalRow({ signal }: { signal: any }) {
       </p>
 
       {signal.evidence && (
-        <div className="mt-2 bg-slate-900 border border-surface-elevated rounded-md p-3">
+        <div className="mt-2 bg-surface-raised/50 border border-surface-elevated rounded-sm p-3">
           <div className="text-[10px] font-mono text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-brand-500"></span>
+            <span className="w-1.5 h-1.5 rounded-sm bg-slate-500"></span>
             EXTRACTED EVIDENCE
           </div>
           <p className="text-sm text-slate-300 font-mono italic whitespace-pre-wrap">

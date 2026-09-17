@@ -1,18 +1,43 @@
+# ── Secrets / environment ──────────────────────────────────────────────────────
 .env
 .env.*
 !.env.example
 
-# Python
+# ── Python / Backend ───────────────────────────────────────────────────────────
+.venv/
 backend/.venv/
+__pycache__/
 backend/__pycache__/
-backend/**/*.py[cod]
+backend/**/__pycache__/
+**/*.py[cod]
+*.pyo
 backend/.pytest_cache/
+.pytest_cache/
 backend/test.db
+*.egg-info/
+dist/
+build/
+htmlcov/
+.coverage
 
-# Node / Next.js
+# ── Node / Next.js / Frontend ──────────────────────────────────────────────────
 frontend/node_modules/
 frontend/.next/
 frontend/out/
+# Turbopack build cache
+frontend/.turbo/
+# type-check build info
+frontend/tsconfig.tsbuildinfo
 
-# OS
+# ── Docker ─────────────────────────────────────────────────────────────────────
+# Ignore local override compose files (keep docker-compose.yml committed)
+docker-compose.override.yml
+
+# ── OS / Editor ────────────────────────────────────────────────────────────────
 .DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+# Keep .vscode/settings.json (CSS lint config) — do not ignore .vscode/
+.vscode/*.log

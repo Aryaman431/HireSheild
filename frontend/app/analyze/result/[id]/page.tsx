@@ -74,7 +74,7 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
     return (
       <div className="min-h-screen bg-slate-950 text-slate-200 p-8">
         <div className="max-w-2xl mx-auto mt-16 panel p-8">
-          <p className="tech-label text-brand-500">INVESTIGATION STATUS</p>
+          <p className="tech-label text-slate-500">INVESTIGATION STATUS</p>
           <h1 className="mt-3 text-3xl font-light tracking-wide text-white">Unable to load result</h1>
           <p className="mt-4 text-slate-400">{message}</p>
           <div className="mt-6 flex gap-3">
@@ -120,8 +120,8 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
         <header className="border-b border-surface-elevated pb-6 flex justify-between items-end">
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-3xl font-light tracking-wide uppercase text-brand-100">Analysis Result</h1>
-              <span className="px-2 py-0.5 bg-brand-500/10 border border-brand-500/30 text-brand-400 text-[10px] font-bold tracking-wider rounded uppercase">
+              <h1 className="text-3xl font-light tracking-wide uppercase text-slate-100">Analysis Result</h1>
+              <span className="px-2 py-0.5 bg-surface-elevated border border-surface-elevated text-slate-300 text-[10px] font-bold tracking-wider rounded-sm uppercase">
                 {result.input_source || 'TEXT'} SOURCE
               </span>
             </div>
@@ -133,8 +133,8 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
         <div className="flex flex-col gap-8">
           <RiskVisualization score={result.risk_score} level={result.risk_level} confidence={result.confidence} />
 
-          <div className="panel p-0 border-brand-500/30">
-            <h2 className="tech-label text-brand-500 border-b border-surface-elevated p-6 mb-0">KEY FINDINGS & SIGNALS</h2>
+          <div className="panel p-0 border-surface-elevated">
+            <h2 className="tech-label text-slate-500 border-b border-surface-elevated p-6 mb-0">KEY FINDINGS & SIGNALS</h2>
             
             {signals.length === 0 ? (
               <p className="text-slate-400 font-mono text-sm p-6">No suspicious signals detected by the risk engine.</p>
@@ -155,10 +155,10 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
           
           {/* Company Intelligence */}
           {result.company && (
-            <div className="panel p-6 border-brand-500/20">
-              <h2 className="tech-label text-brand-500 border-b border-surface-elevated pb-2 mb-4 flex justify-between items-center">
+            <div className="panel p-6 border-surface-elevated">
+              <h2 className="tech-label text-slate-500 border-b border-surface-elevated pb-2 mb-4 flex justify-between items-center">
                 <span>COMPANY INTELLIGENCE</span>
-                <Link href={`/companies/${result.company.id}`} className="text-xs text-brand-400 hover:text-brand-300 transition-colors">VIEW DOSSIER →</Link>
+                <Link href={`/companies/${result.company.id}`} className="text-xs text-slate-400 hover:text-slate-300 transition-colors">VIEW DOSSIER →</Link>
               </h2>
               <div className="space-y-4 text-sm font-mono text-slate-300">
                 <div className="grid grid-cols-3 gap-2">
@@ -179,10 +179,10 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
 
           {/* Recruiter Intelligence */}
           {result.recruiter && (
-            <div className="panel p-6 border-brand-500/20">
-              <h2 className="tech-label text-brand-500 border-b border-surface-elevated pb-2 mb-4 flex justify-between items-center">
+            <div className="panel p-6 border-surface-elevated">
+              <h2 className="tech-label text-slate-500 border-b border-surface-elevated pb-2 mb-4 flex justify-between items-center">
                 <span>RECRUITER INTELLIGENCE</span>
-                <Link href={`/recruiters/${result.recruiter.id}`} className="text-xs text-brand-400 hover:text-brand-300 transition-colors">VIEW DOSSIER →</Link>
+                <Link href={`/recruiters/${result.recruiter.id}`} className="text-xs text-slate-400 hover:text-slate-300 transition-colors">VIEW DOSSIER →</Link>
               </h2>
               <div className="space-y-4 text-sm font-mono text-slate-300">
                 <div className="grid grid-cols-3 gap-2">
@@ -204,19 +204,19 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
 
         {/* Community Intelligence Section */}
         {approvedReportsCount > 0 && (
-          <div className="panel p-6 border-brand-500/20">
-            <h2 className="tech-label text-brand-500 border-b border-surface-elevated pb-2 mb-4">COMMUNITY INTELLIGENCE</h2>
+          <div className="panel p-6 border-surface-elevated">
+            <h2 className="tech-label text-slate-500 border-b border-surface-elevated pb-2 mb-4">COMMUNITY INTELLIGENCE</h2>
             <div className="text-sm font-mono text-slate-300 space-y-2">
               <p className="text-risk-critical font-bold">{approvedReportsCount} approved community report(s) are associated with this opportunity or its recruiter/company.</p>
-              <Link href="/community" className="text-brand-400 hover:underline">View community index →</Link>
+              <Link href="/community" className="text-slate-400 hover:underline">View community index →</Link>
             </div>
           </div>
         )}
 
         {/* Historical Intelligence Section */}
         {historicalData?.available && historicalData.similar_opportunities.length > 0 && (
-          <div className="panel p-6 border-brand-500/20">
-            <h2 className="tech-label text-brand-500 border-b border-surface-elevated pb-2 mb-4">HISTORICAL INTELLIGENCE</h2>
+          <div className="panel p-6 border-surface-elevated">
+            <h2 className="tech-label text-slate-500 border-b border-surface-elevated pb-2 mb-4">HISTORICAL INTELLIGENCE</h2>
             
             <div className="mb-6 space-y-4 text-sm text-slate-300 font-mono">
               <p className="text-brand-300 font-bold uppercase tracking-wide">
@@ -273,12 +273,12 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
           </div>
         )}
 
-        <div className="panel p-6 border-brand-500/30">
-          <h2 className="tech-label text-brand-500 border-b border-surface-elevated pb-2 mb-4">RECOMMENDED ACTIONS</h2>
+        <div className="panel p-6 border-surface-elevated">
+          <h2 className="tech-label text-slate-500 border-b border-surface-elevated pb-2 mb-4">RECOMMENDED ACTIONS</h2>
           <ul className="space-y-3 font-mono text-sm text-slate-300">
             {signals.map((s: {type: string}) => getRecommendation(s.type)).filter(Boolean).map((rec: string, i: number) => (
               <li key={i} className="flex gap-3 items-start">
-                <span className="text-brand-500 mt-0.5">▸</span>
+                <span className="text-slate-500 mt-0.5">▸</span>
                 <span>{rec}</span>
               </li>
             ))}

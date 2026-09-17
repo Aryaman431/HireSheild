@@ -157,9 +157,9 @@ export default function AnalyzePage() {
   if (isAnalyzing) {
     return (
       <div className="app-page flex items-center justify-center">
-        <div className="panel flex w-full max-w-lg flex-col gap-8 p-8">
+        <div className="panel flex w-full max-w-lg flex-col gap-8 p-8 border border-surface-elevated">
           <div className="flex items-center justify-between border-b border-surface-elevated pb-4">
-            <h2 className="tech-label m-0 text-brand-400 animate-pulse">SYSTEM PROCESSING</h2>
+            <h2 className="tech-label m-0 text-slate-300">SYSTEM PROCESSING</h2>
             <span className="text-xs font-mono text-slate-500">ID: PENDING</span>
           </div>
           
@@ -169,11 +169,9 @@ export default function AnalyzePage() {
               const isCurrent = idx === loadingStage;
               
               return (
-                <div key={stage} className={`flex items-center gap-4 font-mono text-sm ${isPast ? 'text-brand-500' : isCurrent ? 'text-slate-200' : 'text-slate-600'}`}>
+                <div key={stage} className={`flex items-center gap-4 font-mono text-sm ${isPast ? 'text-slate-500' : isCurrent ? 'text-slate-200' : 'text-slate-700'}`}>
                   <div className="w-6 flex justify-center">
-                    {isPast ? '✓' : isCurrent ? (
-                      <div className="w-3 h-3 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
-                    ) : '·'}
+                    {isPast ? '[OK]' : isCurrent ? '[..]' : '[  ]'}
                   </div>
                   <span className={`${isCurrent ? 'animate-pulse tracking-wide' : ''}`}>
                     {String(idx + 1).padStart(2, '0')} {stage}
@@ -193,16 +191,16 @@ export default function AnalyzePage() {
         <header className="page-heading">
           <div>
             <p className="eyebrow">New investigation</p>
-            <h1 className="text-3xl font-light tracking-wide text-white sm:text-4xl">Check an opportunity before you engage.</h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">Submit a job post, recruiter email, or document. We’ll surface claims, verification evidence, and meaningful risk signals.</p>
+            <h1 className="text-3xl font-light tracking-wide text-white uppercase">Check an opportunity.</h1>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400 font-mono">Submit a job post, recruiter email, or document. We’ll surface claims, verification evidence, and meaningful risk signals.</p>
           </div>
-          <div className="hidden rounded-lg border border-surface-elevated bg-slate-900/50 px-4 py-3 text-right sm:block">
+          <div className="hidden rounded-sm border border-surface-elevated bg-surface px-4 py-3 text-right sm:block">
             <p className="text-[10px] font-mono uppercase tracking-widest text-slate-500">Source privacy</p>
-            <p className="mt-1 text-xs font-mono text-brand-300">Protected analysis</p>
+            <p className="mt-1 text-xs font-mono text-slate-300">Protected analysis</p>
           </div>
         </header>
 
-        <div className="inline-flex w-full gap-1 rounded-xl border border-surface-elevated/80 bg-slate-900/50 p-1 sm:w-auto">
+        <div className="inline-flex w-full gap-1 rounded-sm border border-surface-elevated bg-surface p-1 sm:w-auto">
           {(['TEXT', 'IMAGE', 'PDF'] as const).map(tab => (
             <button
               key={tab}
@@ -212,13 +210,13 @@ export default function AnalyzePage() {
                 setError(null)
                 setFile(null)
               }}
-              className={`flex-1 rounded-lg px-5 py-2.5 text-sm font-mono transition ${
+              className={`flex-1 rounded-sm px-5 py-2.5 text-sm font-mono font-bold transition ${
                 activeTab === tab 
-                  ? 'bg-brand-500/15 text-brand-300 shadow-sm ring-1 ring-brand-400/20'
+                  ? 'bg-surface-elevated text-white'
                   : 'text-slate-500 hover:bg-surface-raised hover:text-slate-300'
               }`}
             >
-              [ {tab} ]
+              {tab}
             </button>
           ))}
         </div>
@@ -250,8 +248,8 @@ export default function AnalyzePage() {
                 <div 
                   onDragOver={handleDragOver}
                   onDrop={handleDrop}
-                  className={`rounded-xl border-2 border-dashed p-10 text-center transition-colors sm:p-14 ${
-                    file ? 'border-brand-500/50 bg-brand-500/5' : 'border-surface-elevated hover:border-brand-500/40 hover:bg-slate-900/50'
+                  className={`rounded-sm border-2 border-surface-elevated p-10 text-center transition-colors sm:p-14 ${
+                    file ? 'border-slate-500 bg-surface-raised' : 'hover:border-slate-500 hover:bg-surface-raised'
                   }`}
                 >
                   <input 
@@ -264,7 +262,7 @@ export default function AnalyzePage() {
                   
                   {file ? (
                     <div className="flex flex-col items-center gap-3">
-                      <div className="text-brand-400 font-mono text-sm">{file.name}</div>
+                      <div className="text-slate-200 font-mono text-sm font-bold">{file.name}</div>
                       <div className="text-slate-500 font-mono text-xs">{(file.size / 1024 / 1024).toFixed(2)} MB</div>
                       <button 
                         type="button" 
@@ -298,7 +296,7 @@ export default function AnalyzePage() {
               <p className="text-xs leading-5 text-slate-500">Analysis is evidence-led. Never share a password or banking details.</p>
               <button type="submit" className="btn-primary flex shrink-0 items-center justify-center gap-2">
                 <span>INITIATE ANALYSIS</span>
-                <span className="text-brand-700">→</span>
+                <span className="text-slate-500">→</span>
               </button>
             </div>
           </form>

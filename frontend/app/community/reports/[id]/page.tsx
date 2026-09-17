@@ -69,26 +69,26 @@ export default function ReportDetailPage() {
   }
 
   if (loading) {
-    return <div className="min-h-screen bg-slate-950 p-8 text-slate-500 font-mono flex justify-center items-center">Loading intelligence...</div>
+    return <div className="min-h-screen bg-background p-8 text-slate-500 font-mono flex justify-center items-center">Loading intelligence...</div>
   }
 
   if (!report) {
-    return <div className="min-h-screen bg-slate-950 p-8 text-risk-critical font-mono flex justify-center items-center">Report not found.</div>
+    return <div className="min-h-screen bg-background p-8 text-risk-critical font-mono flex justify-center items-center">Report not found.</div>
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-200 p-8">
+    <div className="min-h-screen bg-background text-slate-200 p-8">
       <div className="max-w-4xl mx-auto space-y-8">
         <header className="border-b border-surface-elevated pb-6 flex justify-between items-end">
           <div>
-            <h1 className="text-3xl font-light tracking-wide uppercase text-brand-100">REPORT INTELLIGENCE</h1>
+            <h1 className="text-3xl font-light tracking-wide uppercase text-slate-100">REPORT INTELLIGENCE</h1>
             <p className="text-slate-400 font-mono text-xs mt-2">ID: {report.id}</p>
           </div>
           <Link href="/community" className="btn-ghost text-sm">← COMMUNITY</Link>
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="md:col-span-2 panel p-6 border-brand-500/20 space-y-6">
+          <div className="md:col-span-2 panel p-6 border-surface-elevated space-y-6">
             <div>
               <h2 className="tech-label text-slate-500 mb-2 border-b border-surface-elevated pb-1">REPORT CATEGORY</h2>
               <div className="font-bold text-risk-moderate text-xl tracking-wide">{report.reason.replace(/_/g, ' ')}</div>
@@ -102,7 +102,7 @@ export default function ReportDetailPage() {
             {report.evidence && (
               <div>
                 <h2 className="tech-label text-slate-500 mb-2 border-b border-surface-elevated pb-1">PROVIDED EVIDENCE</h2>
-                <div className="bg-slate-900 border-l-2 border-brand-500 p-3 text-sm text-slate-300 font-mono whitespace-pre-wrap">
+                <div className="bg-surface-raised border-l-2 border-slate-500 p-3 text-sm text-slate-300 font-mono whitespace-pre-wrap">
                   {report.evidence}
                 </div>
               </div>
@@ -114,11 +114,11 @@ export default function ReportDetailPage() {
           </div>
 
           <div className="md:col-span-1 space-y-6">
-            <div className="panel p-6 border-brand-500/20 text-center">
+            <div className="panel p-6 border-surface-elevated text-center">
               <h2 className="tech-label text-slate-400 mb-4">COMMUNITY CONFIRMATIONS</h2>
               <div className="flex justify-around items-center mb-6">
                 <div>
-                  <span className="block text-2xl font-light text-brand-400">{report.confirmations.happened_to_me}</span>
+                  <span className="block text-2xl font-light text-slate-300">{report.confirmations.happened_to_me}</span>
                   <span className="text-[10px] uppercase tracking-wider text-slate-500">Confirmed</span>
                 </div>
                 <div>
@@ -146,13 +146,13 @@ export default function ReportDetailPage() {
               </div>
             </div>
 
-            <div className="panel p-6 border-brand-500/20">
-              <h2 className="tech-label text-brand-500 border-b border-surface-elevated pb-2 mb-4">ASSOCIATED ENTITIES</h2>
+            <div className="panel p-6 border-surface-elevated">
+              <h2 className="tech-label text-slate-500 border-b border-surface-elevated pb-2 mb-4">ASSOCIATED ENTITIES</h2>
               <ul className="space-y-3 font-mono text-xs">
                 {report.company_id && (
                   <li>
                     <span className="text-slate-500 block mb-1">Company</span>
-                    <Link href={`/companies/${report.company_id}`} className="text-brand-400 hover:underline break-all">
+                    <Link href={`/companies/${report.company_id}`} className="text-slate-400 hover:underline break-all">
                       {report.company_id}
                     </Link>
                   </li>
@@ -160,7 +160,7 @@ export default function ReportDetailPage() {
                 {report.recruiter_id && (
                   <li>
                     <span className="text-slate-500 block mb-1">Recruiter</span>
-                    <Link href={`/recruiters/${report.recruiter_id}`} className="text-brand-400 hover:underline break-all">
+                    <Link href={`/recruiters/${report.recruiter_id}`} className="text-slate-400 hover:underline break-all">
                       {report.recruiter_id}
                     </Link>
                   </li>
@@ -168,7 +168,7 @@ export default function ReportDetailPage() {
                 {report.job_posting_id && (
                   <li>
                     <span className="text-slate-500 block mb-1">Opportunity</span>
-                    <Link href={`/analyze/result/${report.job_posting_id}`} className="text-brand-400 hover:underline break-all">
+                    <Link href={`/analyze/result/${report.job_posting_id}`} className="text-slate-400 hover:underline break-all">
                       {report.job_posting_id}
                     </Link>
                   </li>

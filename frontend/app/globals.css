@@ -17,6 +17,7 @@
   --color-risk-suspicious: #ffb703;
   --color-risk-low: #10b981;
   --color-risk-verified: #06b6d4;
+  --color-risk-moderate: #ffb703;
 
   /* Custom dark theme colors for investigation aesthetic */
   --color-surface: #0f172a; /* slate-900 */
@@ -41,32 +42,37 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
+  /* Grain overlay — subtle noise texture for depth */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.028;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 180px 180px;
+  }
+
   ::selection {
     background: rgb(59 130 246 / 0.35);
     color: white;
   }
 
   /* Scrollbar styling for a tech-tool feel */
-  ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-  }
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb {
     background: var(--color-surface-elevated);
     border-radius: 4px;
   }
-  ::-webkit-scrollbar-thumb:hover {
-    background: var(--color-brand-500);
-  }
+  ::-webkit-scrollbar-thumb:hover { background: var(--color-brand-500); }
 }
 
 @layer components {
   /* Investigation Panel */
   .panel {
-    @apply bg-surface/90 border border-surface-elevated/80 rounded-xl shadow-xl shadow-black/30 overflow-hidden relative;
+    @apply bg-surface border border-surface-elevated rounded-sm overflow-hidden relative;
   }
   
   .panel-header {
@@ -89,7 +95,7 @@
 
   /* Badge */
   .badge {
-    @apply inline-flex items-center px-2 py-0.5 rounded text-xs font-medium font-mono uppercase tracking-wider;
+    @apply inline-flex items-center px-1.5 py-0.5 rounded-sm text-[10px] font-bold font-mono uppercase tracking-wider;
   }
   .badge-critical {
     @apply bg-risk-critical/10 text-risk-critical border border-risk-critical/30;
@@ -109,12 +115,12 @@
 
   /* Ghost Button */
   .btn-ghost {
-    @apply px-4 py-2 rounded-md font-mono text-sm tracking-wider uppercase text-slate-300 hover:text-white hover:bg-surface-raised transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-brand-500/50;
+    @apply px-4 py-2 rounded-sm border border-transparent font-mono text-xs font-bold tracking-wider uppercase text-slate-400 hover:text-slate-100 hover:border-surface-elevated transition-colors duration-200 focus:outline-none focus:ring-1 focus:ring-slate-500;
   }
 
   /* Primary Button */
   .btn-primary {
-    @apply px-4 py-2.5 rounded-lg font-mono text-sm tracking-wider uppercase bg-brand-500 text-white hover:bg-brand-400 shadow-[0_0_15px_rgba(59,130,246,0.3)] hover:shadow-[0_0_25px_rgba(59,130,246,0.5)] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-brand-500/50 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply px-4 py-2 rounded-sm font-mono text-xs font-bold tracking-wider uppercase bg-slate-100 text-slate-900 hover:bg-white transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-950 disabled:cursor-not-allowed disabled:opacity-50;
   }
 }
 
@@ -131,20 +137,20 @@
 }
 
 .eyebrow {
-  @apply mb-2 flex items-center gap-2 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-brand-400;
+  @apply mb-2 flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400;
 }
 
 .eyebrow::before {
   content: "";
-  @apply h-1.5 w-1.5 rounded-full bg-brand-400 shadow-[0_0_10px_rgba(96,165,250,0.9)];
+  @apply h-1.5 w-1.5 rounded-sm bg-slate-500;
 }
 
 .input-field {
-  @apply w-full rounded-lg border border-surface-elevated bg-slate-950/70 px-4 py-3 text-sm text-slate-200 outline-none transition placeholder:text-slate-600 focus:border-brand-400 focus:ring-2 focus:ring-brand-500/15;
+  @apply w-full rounded-sm border border-surface-elevated bg-surface px-4 py-3 text-sm text-slate-200 outline-none transition placeholder:text-slate-600 focus:border-brand-500;
 }
 
 .data-card {
-  @apply rounded-lg border border-surface-elevated/70 bg-slate-950/45 p-4 transition-colors hover:border-slate-600;
+  @apply rounded-sm border border-surface-elevated bg-surface p-4 transition-colors hover:border-slate-500;
 }
 
 /* =====================================================
@@ -159,38 +165,14 @@
   background-size: 40px 40px;
 }
 
-/* Radial overlay for the hero area */
-.intel-radial {
-  background: radial-gradient(
-    ellipse 600px 400px at 50% 0%,
-    rgba(59, 130, 246, 0.06) 0%,
-    transparent 70%
-  );
-}
+/* =====================================================
+   KEYFRAME ANIMATIONS
+   ===================================================== */
 
-/* Slow scanning line */
-@keyframes scanline {
-  0% { transform: translateY(-100%); opacity: 0; }
-  10% { opacity: 1; }
-  90% { opacity: 1; }
-  100% { transform: translateY(600px); opacity: 0; }
-}
-
-.scan-line {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(59, 130, 246, 0.4) 20%,
-    rgba(59, 130, 246, 0.6) 50%,
-    rgba(59, 130, 246, 0.4) 80%,
-    transparent 100%
-  );
-  animation: scanline 8s ease-in-out infinite;
+/* Cursor blink — used by TypewriterText */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
 }
 
 /* Pipeline connector pulse */
@@ -222,18 +204,55 @@
   animation: signal-pulse 2s ease-in-out infinite;
 }
 
-/* Reduced motion support */
-@media (prefers-reduced-motion: reduce) {
-  .scan-line,
-  .connector-dot,
-  .risk-gauge-ring,
-  .signal-dot {
-    animation: none;
+/* Glitch effect — RGB split, used on security-flavored elements */
+@keyframes glitch-split {
+  0%, 100% {
+    clip-path: inset(0 0 100% 0);
+    transform: translateX(0);
+    opacity: 1;
   }
-  .scan-line { opacity: 0; }
-  .connector-dot { opacity: 0.5; }
-  .risk-gauge-ring { stroke-dashoffset: 0; }
-  .signal-dot { opacity: 0.7; transform: scale(1); }
+  10% {
+    clip-path: inset(15% 0 75% 0);
+    transform: translateX(-3px);
+    opacity: 0.8;
+  }
+  20% {
+    clip-path: inset(60% 0 10% 0);
+    transform: translateX(3px);
+    opacity: 0.9;
+  }
+  30% {
+    clip-path: inset(0 0 100% 0);
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Apply to .glitch-hover:hover::before / ::after for RGB split */
+.glitch-hover {
+  position: relative;
+}
+.glitch-hover::before,
+.glitch-hover::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+.glitch-hover:hover::before {
+  color: #ff2a2a;
+  opacity: 0.5;
+  animation: glitch-split 0.15s steps(1) 1;
+  mix-blend-mode: screen;
+  transform: translateX(-2px);
+}
+.glitch-hover:hover::after {
+  color: #00fff5;
+  opacity: 0.4;
+  animation: glitch-split 0.15s steps(1) 0.05s 1;
+  mix-blend-mode: screen;
+  transform: translateX(2px);
 }
 
 /* Investigation panel chrome — accent bar */
@@ -247,6 +266,22 @@
   left: 0;
   right: 0;
   height: 2px;
-  background: linear-gradient(90deg, var(--color-brand-500), transparent);
-  opacity: 0.5;
+  background: var(--color-surface-elevated);
+  opacity: 1;
+}
+
+/* Reduced motion overrides */
+@media (prefers-reduced-motion: reduce) {
+  body::after { display: none; }
+
+  .connector-dot,
+  .risk-gauge-ring,
+  .signal-dot {
+    animation: none;
+  }
+  .connector-dot { opacity: 0.5; }
+  .risk-gauge-ring { stroke-dashoffset: 0; }
+  .signal-dot { opacity: 0.7; transform: scale(1); }
+  .glitch-hover::before,
+  .glitch-hover::after { display: none; }
 }

@@ -1,6 +1,10 @@
 services:
+  # ─────────────────────────────────────────────
+  # PostgreSQL + pgvector
+  # ─────────────────────────────────────────────
   db:
     image: ankane/pgvector:v0.5.1
+    restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
@@ -16,11 +20,15 @@ services:
       retries: 12
       start_period: 10s
 
+  # ─────────────────────────────────────────────
+  # FastAPI backend
+  # ─────────────────────────────────────────────
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
       target: development
+    restart: unless-stopped
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     volumes:
       - ./backend:/app
@@ -42,19 +50,29 @@ services:
       retries: 6
       start_period: 20s
 
+  # ─────────────────────────────────────────────
+  # Next.js frontend
+  # Stack: Next.js 16 · React 19 · Tailwind CSS v4
+  #        Framer Motion · Lucide React · Clerk
+  # ─────────────────────────────────────────────
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
       target: development
+    restart: unless-stopped
     command: npm run dev
     volumes:
       - ./frontend:/app
+      # Preserve node_modules from the image layer; do NOT override with host copy.
+      # framer-motion and lucide-react are installed via npm ci in the Dockerfile.
       - /app/node_modules
     ports:
       - "3000:3000"
     environment:
+      # Exposed to the browser
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+      # Used by Next.js SSR (server-to-server, stays inside Docker network)
       INTERNAL_API_URL: ${INTERNAL_API_URL:-http://backend:8000}
     env_file:
       - path: .env
@@ -63,11 +81,11 @@ services:
       backend:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://localhost:3000').then((response) => { if (!response.ok) process.exit(1) }).catch(() => process.exit(1))"]
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000').then((r) => { if (!r.ok) process.exit(1) }).catch(() => process.exit(1))"]
       interval: 10s
       timeout: 5s
       retries: 6
-      start_period: 20s
+      start_period: 30s
 
 volumes:
   postgres_data:
