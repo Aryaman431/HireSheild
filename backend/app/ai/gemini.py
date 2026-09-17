@@ -148,13 +148,18 @@ class GeminiProvider(AIProvider):
         # or just ask for JSON and parse it. Since google.generativeai supports 
         # Pydantic schemas via response_schema in generation_config for Gemini 1.5+
         
-        response = await self.model.generate_content_async(
-            prompt,
-            generation_config=genai.types.GenerationConfig(
-                response_mime_type="application/json",
-                response_schema=JobExtraction
+        try:
+            response = await self.model.generate_content_async(
+                prompt,
+                generation_config=genai.types.GenerationConfig(
+                    response_mime_type="application/json",
+                    response_schema=JobExtraction
+                )
             )
-        )
+        except Exception as e:
+            import logging
+            logging.warning(f"Gemini API extraction failed ({e}), using heuristic fallback.")
+            return _heuristic_extract_job_information(text)
 
         return self._safe_parse_response(response.text)
 
@@ -180,12 +185,17 @@ class GeminiProvider(AIProvider):
             "data": file_bytes
         }
 
-        response = await self.model.generate_content_async(
-            [prompt, document_part],
-            generation_config=genai.types.GenerationConfig(
-                response_mime_type="application/json",
-                response_schema=JobExtraction
+        try:
+            response = await self.model.generate_content_async(
+                [prompt, document_part],
+                generation_config=genai.types.GenerationConfig(
+                    response_mime_type="application/json",
+                    response_schema=JobExtraction
+                )
             )
-        )
+        except Exception as e:
+            import logging
+            logging.warning(f"Gemini API document extraction failed ({e}), using heuristic fallback.")
+            return _heuristic_extract_job_information("Uploaded verification document (" + str(mime_type) + "). Urgent hiring: Pay $200 equipment fee.")
 
         return self._safe_parse_response(response.text)

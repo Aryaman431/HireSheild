@@ -152,7 +152,7 @@ async def analyze_job(
         logging.error(traceback.format_exc())
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An error occurred during text analysis."
+            detail=f"An error occurred during text analysis. ({str(e)})"
         )
 
 @router.get("/{job_id}/result")
