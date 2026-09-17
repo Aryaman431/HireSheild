@@ -50,11 +50,12 @@ class ReportService:
         normalized_evidence = ReportService._normalize_text(report_data.evidence)
 
         for existing in existing_reports:
-            if (
-                ReportService._normalize_text(existing.evidence) == normalized_evidence
-                or ReportService._normalize_text(existing.description) == normalized_description
-                or abs(len(existing.description) - len(report_data.description)) < 50
-            ):
+            existing_desc = ReportService._normalize_text(existing.description)
+            existing_ev = ReportService._normalize_text(existing.evidence)
+
+            if existing_desc == normalized_description:
+                raise HTTPException(status_code=409, detail="A similar report has already been submitted by this user.")
+            if normalized_evidence and existing_ev and existing_ev == normalized_evidence:
                 raise HTTPException(status_code=409, detail="A similar report has already been submitted by this user.")
 
         # 3. Create Report (Default status: PENDING)

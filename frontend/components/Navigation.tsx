@@ -1,13 +1,14 @@
 'use client'
 
 import Link from 'next/link'
-import { UserButton, SignInButton, SignUpButton } from '@clerk/nextjs'
+import { UserButton, SignInButton, SignUpButton } from '@/lib/auth'
 import { useEffect, useState } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
-import { Shield } from 'lucide-react'
+import { Shield, Menu, X } from 'lucide-react'
 
 export default function Navigation({ userId }: { userId: string | null }) {
   const [scrolled, setScrolled] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
   const prefersReduced = useReducedMotion()
 
   useEffect(() => {
@@ -50,7 +51,7 @@ export default function Navigation({ userId }: { userId: string | null }) {
           </Link>
         </div>
 
-        {/* Nav links */}
+        {/* Nav links (Desktop) */}
         <nav className="hidden items-center gap-1 rounded-sm border border-surface-elevated bg-surface p-1 md:flex">
           {[
             { href: '/analyze', label: 'Analyze' },
@@ -61,12 +62,12 @@ export default function Navigation({ userId }: { userId: string | null }) {
           ))}
         </nav>
 
-        {/* Auth */}
-        <div className="flex items-center gap-4">
+        {/* Auth & Mobile Toggle */}
+        <div className="flex items-center gap-3">
           {userId ? (
             <UserButton />
           ) : (
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               <SignInButton mode="modal">
                 <button className="text-xs font-mono uppercase tracking-widest text-slate-400 hover:text-slate-200 transition-colors">
                   Log In
@@ -79,8 +80,37 @@ export default function Navigation({ userId }: { userId: string | null }) {
               </SignUpButton>
             </div>
           )}
+
+          {/* Mobile hamburger button */}
+          <button
+            onClick={() => setMobileOpen(!mobileOpen)}
+            className="flex h-8 w-8 items-center justify-center rounded-sm border border-surface-elevated bg-surface text-slate-400 hover:text-slate-200 md:hidden transition-colors"
+            aria-label="Toggle Navigation Menu"
+          >
+            {mobileOpen ? <X size={15} /> : <Menu size={15} />}
+          </button>
         </div>
       </div>
+
+      {/* Mobile Drawer */}
+      {mobileOpen && (
+        <div className="border-b border-surface-elevated bg-slate-950/95 backdrop-blur-md px-5 py-3 md:hidden font-mono text-xs space-y-1">
+          {[
+            { href: '/analyze', label: 'Analyze Opportunity' },
+            { href: '/dashboard', label: 'Intelligence Dashboard' },
+            { href: '/community', label: 'Community Reports' },
+          ].map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              onClick={() => setMobileOpen(false)}
+              className="block rounded-sm px-3 py-2 text-slate-300 hover:bg-surface-raised hover:text-white uppercase tracking-wider transition-colors"
+            >
+              {link.label}
+            </Link>
+          ))}
+        </div>
+      )}
     </header>
   )
 }

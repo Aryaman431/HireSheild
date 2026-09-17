@@ -84,7 +84,8 @@ async def get_company_intelligence(
             high_risk_count += 1
 
         for sig in job.risk_signals:
-            signal_counts[sig.signal_type.value] = signal_counts.get(sig.signal_type.value, 0) + 1
+            sig_type = getattr(sig.signal_type, "value", sig.signal_type)
+            signal_counts[sig_type] = signal_counts.get(sig_type, 0) + 1
 
         jobs.append({
             "risk_score": job.risk_score,

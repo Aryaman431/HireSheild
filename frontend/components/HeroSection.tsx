@@ -86,20 +86,25 @@ export default function HeroSection({ isSignedIn }: HeroSectionProps) {
       )}
 
       <div className="flex flex-col items-start max-w-3xl relative">
-        {/* Eyebrow */}
+        {/* Eyebrow & Status */}
         <motion.div
-          className="flex items-center gap-2 mb-6"
+          className="flex flex-wrap items-center gap-2.5 mb-6"
           initial={{ opacity: 0, x: -12 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.4, ease: 'easeOut' }}
         >
-          <Shield size={11} className="text-slate-500" strokeWidth={2} />
-          <span className="tech-label text-slate-400 mb-0">THREAT INTELLIGENCE PLATFORM</span>
-          <span className="h-1 w-1 rounded-full bg-slate-600 animate-pulse" />
+          <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-sm bg-surface border border-surface-elevated text-[11px] font-mono">
+            <Shield size={12} className="text-brand-400" strokeWidth={2} />
+            <span className="text-slate-300 font-bold uppercase tracking-wider">EMPLOYMENT THREAT INTELLIGENCE</span>
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          </div>
+          <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest hidden sm:inline-block">
+            DEFENSIVE RECRUITMENT AUDITING
+          </span>
         </motion.div>
 
         {/* Headline – word stagger */}
-        <h1 className="text-4xl md:text-5xl lg:text-[3.5rem] font-light tracking-wide text-white leading-[1.18] mb-5 uppercase">
+        <h1 className="text-4xl md:text-5xl lg:text-[3.5rem] font-light tracking-wide text-white leading-[1.15] mb-5 uppercase">
           <div className="flex flex-wrap gap-x-[0.3em] gap-y-0 mb-1">
             {HEADLINE_LINE1.map((word, i) => (
               <motion.span
@@ -130,51 +135,67 @@ export default function HeroSection({ isSignedIn }: HeroSectionProps) {
           </div>
         </h1>
 
-        {/* Subhead */}
+        {/* Subhead with crisp 10-second value prop */}
         <motion.p
-          className="text-slate-400 text-base md:text-lg leading-relaxed mb-8 max-w-2xl font-mono"
+          className="text-slate-300 text-base md:text-lg leading-relaxed mb-6 max-w-2xl font-mono"
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.4, ease: 'easeOut' }}
         >
-          HireShield analyzes job opportunities and identifies suspicious signals, verification issues, and historical intelligence before you apply.
+          HireShield protects job seekers from recruitment fraud. We cross-verify employer domains, detect phantom fee requests, match against historical threat databases, and score job legitimacy before you apply or send sensitive data.
         </motion.p>
+
+        {/* Core capability pills */}
+        <motion.div
+          className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 mb-8"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, delay: 0.5, ease: 'easeOut' }}
+        >
+          {[
+            { icon: '🌐', label: 'Domain & DNS Checks' },
+            { icon: '⚡', label: 'Algorithmic Risk Scoring' },
+            { icon: '🛡️', label: 'Phantom Fee Detection' },
+            { icon: '🔍', label: 'Historical Threat Intel' },
+          ].map((pill) => (
+            <div
+              key={pill.label}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-sm bg-surface-raised/40 border border-surface-elevated text-[11px] font-mono text-slate-400 hover:text-slate-200 transition-colors"
+            >
+              <span className="text-xs">{pill.icon}</span>
+              <span>{pill.label}</span>
+            </div>
+          ))}
+        </motion.div>
 
         {/* CTA row */}
         <motion.div
-          className="flex flex-col sm:flex-row gap-4 items-start"
+          className="flex flex-col sm:flex-row gap-4 items-start w-full sm:w-auto"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45, delay: 0.55, ease: 'easeOut' }}
+          transition={{ duration: 0.45, delay: 0.6, ease: 'easeOut' }}
         >
           {/* Primary CTA – filled with shine sweep */}
           <Link
             href="/analyze"
             id="hero-cta-analyze"
-            className="group relative overflow-hidden flex items-center gap-2 px-8 py-3 rounded-sm bg-slate-100 text-slate-900 font-mono text-xs font-bold tracking-widest uppercase transition-all duration-200 hover:scale-[1.02] hover:bg-white focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-950"
-            style={{ boxShadow: '0 0 0 0 rgba(148,163,184,0)' }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.boxShadow = '0 0 20px 2px rgba(148,163,184,0.18)'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.boxShadow = '0 0 0 0 rgba(148,163,184,0)'
-            }}
+            className="group relative overflow-hidden flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-3.5 rounded-sm bg-slate-100 text-slate-900 font-mono text-xs font-bold tracking-widest uppercase transition-all duration-200 hover:scale-[1.02] hover:bg-white focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-950 shadow-[0_0_20px_rgba(255,255,255,0.1)]"
           >
             {/* Shine sweep */}
             <span
               aria-hidden="true"
-              className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-500 ease-in-out bg-gradient-to-r from-transparent via-white/20 to-transparent"
+              className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-500 ease-in-out bg-gradient-to-r from-transparent via-white/25 to-transparent"
             />
-            <span className="relative z-10">ANALYZE A JOB</span>
-            <ArrowRight size={13} className="relative z-10 transition-transform duration-200 group-hover:translate-x-0.5" />
+            <span className="relative z-10">ANALYZE A JOB POST</span>
+            <ArrowRight size={13} className="relative z-10 transition-transform duration-200 group-hover:translate-x-1" />
           </Link>
 
           {/* Ghost CTA – HOW IT WORKS */}
           <a
             href="#how-it-works"
-            className="group flex items-center gap-2 px-8 py-3 rounded-sm border border-surface-elevated font-mono text-xs font-bold tracking-widest uppercase text-slate-400 transition-all duration-200 hover:border-slate-500 hover:bg-surface/60 hover:text-slate-200 focus:outline-none focus:ring-1 focus:ring-slate-500"
+            className="group flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-3.5 rounded-sm border border-surface-elevated font-mono text-xs font-bold tracking-widest uppercase text-slate-400 transition-all duration-200 hover:border-slate-400 hover:bg-surface-raised/60 hover:text-slate-200 focus:outline-none focus:ring-1 focus:ring-slate-500"
           >
-            <Terminal size={11} className="text-slate-600 group-hover:text-slate-400 transition-colors" />
+            <Terminal size={12} className="text-slate-500 group-hover:text-slate-300 transition-colors" />
             HOW IT WORKS
           </a>
 
@@ -183,7 +204,7 @@ export default function HeroSection({ isSignedIn }: HeroSectionProps) {
             <Link
               href="/sign-in"
               id="hero-cta-login"
-              className="group flex items-center gap-2 px-8 py-3 rounded-sm border border-surface-elevated font-mono text-xs font-bold tracking-widest uppercase text-slate-400 transition-all duration-200 hover:border-slate-500 hover:bg-surface/60 hover:text-slate-200 focus:outline-none focus:ring-1 focus:ring-slate-500"
+              className="group flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-3.5 rounded-sm border border-surface-elevated font-mono text-xs font-bold tracking-widest uppercase text-slate-400 transition-all duration-200 hover:border-slate-400 hover:bg-surface-raised/60 hover:text-slate-200 focus:outline-none focus:ring-1 focus:ring-slate-500"
             >
               SYSTEM LOGIN
             </Link>

@@ -51,7 +51,8 @@ async def get_recruiter(
             high_risk_count += 1
 
         for sig in job.risk_signals:
-            signal_counts[sig.signal_type.value] = signal_counts.get(sig.signal_type.value, 0) + 1
+            sig_type = getattr(sig.signal_type, "value", sig.signal_type)
+            signal_counts[sig_type] = signal_counts.get(sig_type, 0) + 1
 
         jobs.append({
             "risk_score": job.risk_score,
@@ -69,8 +70,8 @@ async def get_recruiter(
     return {
         "id": recruiter.id,
         "name": recruiter.name,
-        "email": None,
-        "phone": None,
+        "email": recruiter.email,
+        "phone": recruiter.phone,
         "company": {
             "id": recruiter.company.id,
             "name": recruiter.company.name

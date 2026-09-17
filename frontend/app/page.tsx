@@ -1,6 +1,6 @@
 'use client'
 
-import { useAuth } from '@clerk/nextjs'
+import { useAuth } from '@/lib/auth'
 import Link from 'next/link'
 import AnimatedBackground from '@/components/AnimatedBackground'
 import HeroSection from '@/components/HeroSection'
@@ -81,11 +81,27 @@ export default function Home() {
         className="relative z-10 w-full max-w-6xl mx-auto px-6 py-12"
         aria-label="Sample investigation demonstration"
       >
-        <SectionReveal className="mb-6 flex justify-between items-end">
-          <h2 className="tech-label text-slate-500 m-0">DEMO INVESTIGATION</h2>
-          <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest bg-surface-elevated/30 px-2 py-1 rounded-sm">
-            SAMPLE DATA ONLY
-          </span>
+        <SectionReveal className="mb-6 flex flex-col sm:flex-row justify-between sm:items-end gap-3">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="h-2 w-2 rounded-full bg-risk-critical animate-ping" />
+              <h2 className="tech-label text-slate-400 m-0">LIVE INVESTIGATION CASE PREVIEW</h2>
+            </div>
+            <p className="text-xs font-mono text-slate-500">
+              Examining simulated fraudulent offer letter & domain cross-check
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="text-[10px] font-mono text-slate-400 uppercase tracking-widest bg-surface-elevated/40 border border-surface-elevated px-2.5 py-1 rounded-sm">
+              SAMPLE THREAT FILE
+            </span>
+            <Link 
+              href="/analyze" 
+              className="text-xs font-mono text-brand-400 hover:text-brand-300 transition-colors flex items-center gap-1"
+            >
+              RUN YOUR OWN SCAN <span aria-hidden="true">→</span>
+            </Link>
+          </div>
         </SectionReveal>
 
         <SectionReveal delay={0.08}>

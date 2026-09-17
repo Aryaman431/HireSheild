@@ -1,6 +1,7 @@
 from urllib.parse import urljoin, urlsplit
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy.orm import selectinload
 from app.models.verification_check import VerificationCheck, EntityType, CheckType, CheckResult
 from app.models.company import Company, VerificationStatus as CompanyVerificationStatus
 from app.models.recruiter import Recruiter
@@ -304,7 +305,11 @@ class VerificationService:
         Orchestrates verification for a job, its company, and recruiter.
         """
         # Fetch Job, Company, Recruiter
-        result = await self.db.execute(select(JobPosting).where(JobPosting.id == job_id))
+        result = await self.db.execute(
+            select(JobPosting)
+            .options(selectinload(JobPosting.analysis_runs))
+            .where(JobPosting.id == job_id)
+        )
         job = result.scalar_one_or_none()
         if not job:
             return

@@ -36,9 +36,14 @@ class EmbeddingService:
             # Add top evidence securely (avoiding PII, focusing on mechanics)
             evidence_parts = []
             for sig in signals:
-                for ev in sig.evidence_items:
-                    if ev.quote:
-                        evidence_parts.append(f'"{ev.quote}"')
+                try:
+                    for ev in getattr(sig, "evidence_items", []):
+                        if getattr(ev, "quote", None):
+                            evidence_parts.append(f'"{ev.quote}"')
+                except Exception:
+                    pass
+                if getattr(sig, "reasoning", None):
+                    evidence_parts.append(sig.reasoning)
             if evidence_parts:
                 parts.append(f"EVIDENCE:\n" + "\n".join(evidence_parts))
                 

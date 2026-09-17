@@ -1,9 +1,9 @@
-import { auth } from '@clerk/nextjs/server'
+import { getAuth } from '@/lib/auth-server'
 import Link from 'next/link'
 import { getServerApiUrl } from '@/lib/api'
 
 async function getCommunityFeed(page = 1) {
-  const { getToken } = await auth()
+  const { getToken } = await getAuth()
   const token = await getToken()
 
   const apiUrl = getServerApiUrl()
@@ -24,19 +24,37 @@ async function getCommunityFeed(page = 1) {
   }
 }
 
+import { ShieldAlert } from 'lucide-react'
+
 export default async function CommunityPage({
   searchParams,
 }: {
   searchParams: Promise<{ page?: string }>
 }) {
-  const { userId } = await auth()
+  const { userId } = await getAuth()
   const page = Number((await searchParams).page) || 1
   const feed = await getCommunityFeed(page)
   
   if (!feed) {
     return (
-      <div className="min-h-screen bg-background text-slate-200 p-8 flex items-center justify-center">
-        <p className="font-mono text-slate-500">Failed to load community intelligence.</p>
+      <div className="app-page">
+        <div className="page-wrap max-w-2xl py-16">
+          <div className="panel p-8 border-surface-elevated text-center space-y-4">
+            <div className="inline-flex p-3 rounded-full bg-surface-elevated text-slate-400 border border-surface-raised mb-2">
+              <ShieldAlert size={24} className="text-amber-400" />
+            </div>
+            <h1 className="text-xl font-light uppercase tracking-wider text-slate-100">
+              COMMUNITY INTELLIGENCE FEED UNAVAILABLE
+            </h1>
+            <p className="font-mono text-xs text-slate-400 leading-relaxed max-w-md mx-auto">
+              Unable to synchronize with the community threat database. Please verify the backend connection or return to active analysis.
+            </p>
+            <div className="flex justify-center gap-3 pt-2">
+              <Link href="/analyze" className="btn-primary text-xs">← INITIATE AUDIT</Link>
+              <Link href="/dashboard" className="btn-ghost text-xs border border-surface-elevated">DASHBOARD</Link>
+            </div>
+          </div>
+        </div>
       </div>
     )
   }

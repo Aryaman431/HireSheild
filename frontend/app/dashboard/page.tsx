@@ -1,10 +1,10 @@
-import { currentUser } from '@clerk/nextjs/server'
+import { getCurrentUser } from '@/lib/auth-server'
 import { redirect } from 'next/navigation'
-import { SignOutButton } from '@clerk/nextjs'
+import { SignOutButton } from '@/lib/auth'
 import Link from 'next/link'
 
 export default async function DashboardPage() {
-  const user = await currentUser()
+  const user = await getCurrentUser()
 
   if (!user) {
     redirect('/')

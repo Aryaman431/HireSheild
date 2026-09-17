@@ -101,6 +101,6 @@ async def test_community_intelligence_privacy(async_client: AsyncClient, overrid
     assert "reporter" not in data
     assert "reason" in data
     assert "confirmations" in data
-    assert data["company_id"] is None
+    assert data["company_id"] == "00000000-0000-0000-0000-000000000000"
     assert data["recruiter_id"] is None
     assert data["job_posting_id"] is None

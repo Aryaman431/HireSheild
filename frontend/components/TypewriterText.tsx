@@ -23,16 +23,11 @@ export default function TypewriterText({
   const prefersReduced = useReducedMotion()
 
   useEffect(() => {
-    if (!inView) return
-    if (prefersReduced) {
-      setDisplayed(text)
-      setDone(true)
-      return
-    }
+    if (!inView || prefersReduced) return
     let i = 0
-    setDisplayed('')
-    setDone(false)
     const timeout = setTimeout(() => {
+      setDisplayed('')
+      setDone(false)
       const interval = setInterval(() => {
         i++
         setDisplayed(text.slice(0, i))
@@ -46,10 +41,13 @@ export default function TypewriterText({
     return () => clearTimeout(timeout)
   }, [inView, text, speed, startDelay, prefersReduced])
 
+  const outputText = prefersReduced ? (inView ? text : '') : displayed
+  const isDone = prefersReduced ? (inView ? true : false) : done
+
   return (
     <span ref={ref} className={className}>
-      {displayed}
-      {!done && (
+      {outputText}
+      {!isDone && (
         <span
           aria-hidden="true"
           className="inline-block w-[2px] h-[1em] bg-current align-middle ml-0.5 animate-[blink_1s_step-end_infinite]"

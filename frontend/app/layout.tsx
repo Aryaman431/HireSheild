@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Navigation from "@/components/Navigation";
-import { ClerkProvider } from '@clerk/nextjs'
-import { auth } from "@clerk/nextjs/server";
+import { AuthProvider } from "@/lib/auth";
+import { getAuth } from "@/lib/auth-server";
 
 export const metadata: Metadata = {
   title: "HireShield | Threat Intelligence",
@@ -14,28 +14,10 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { userId } = await auth()
+  const { userId } = await getAuth()
 
   return (
-    <ClerkProvider
-      appearance={{
-        variables: {
-          colorPrimary: '#64748b',
-          colorBackground: '#020617',
-          borderRadius: '2px',
-        },
-        elements: {
-          card: 'border border-[#1e293b]',
-          headerTitle: 'font-mono uppercase tracking-widest text-lg',
-          headerSubtitle: 'font-mono text-xs text-slate-400',
-          formButtonPrimary: 'font-mono font-bold uppercase tracking-widest bg-slate-800 hover:bg-slate-700 text-slate-300',
-          socialButtonsBlockButton: 'font-mono text-xs border border-slate-800 hover:bg-slate-900',
-          formFieldLabel: 'font-mono text-xs uppercase tracking-widest text-slate-500',
-          formFieldInput: 'font-mono text-sm border-slate-800 focus:border-slate-500',
-          footerActionLink: 'font-mono text-slate-400 hover:text-slate-300',
-        }
-      }}
-    >
+    <AuthProvider>
       <html
         lang="en"
         className="h-full antialiased dark"
@@ -47,6 +29,6 @@ export default async function RootLayout({
           </main>
         </body>
       </html>
-    </ClerkProvider>
+    </AuthProvider>
   );
 }

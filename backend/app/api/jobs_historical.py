@@ -52,8 +52,8 @@ async def get_historical_intelligence(
     patterns = historical_service.aggregate_patterns(similar_jobs)
     
     formatted_jobs = []
-    for job in similar_jobs:
-        distance = getattr(job, "_similarity_distance", None)
+    for s_job in similar_jobs:
+        distance = getattr(s_job, "_similarity_distance", None)
         relevance = "RELATED"
         if distance is not None:
             if distance <= 0.1:
@@ -61,10 +61,14 @@ async def get_historical_intelligence(
             elif distance <= 0.15:
                 relevance = "SIMILAR"
 
+        company_name = s_job.company.name if s_job.company else None
+
         formatted_jobs.append({
+            "title": s_job.title or "Historical Opportunity",
+            "company": company_name or "Private Entity",
             "relevance": relevance,
-            "risk_level": getattr(job.risk_level, 'value', job.risk_level) if job.risk_level else "UNKNOWN",
-            "risk_score": job.risk_score,
+            "risk_level": getattr(s_job.risk_level, 'value', s_job.risk_level) if s_job.risk_level else "UNKNOWN",
+            "risk_score": s_job.risk_score,
             "summary": "Private investigation details are withheld to protect user privacy."
         })
 

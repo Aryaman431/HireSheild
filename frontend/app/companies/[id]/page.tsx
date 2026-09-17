@@ -1,17 +1,17 @@
-import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { auth } from '@clerk/nextjs/server'
+import { getAuth } from '@/lib/auth-server'
 import RiskVisualization from '@/components/RiskVisualization'
 import { getServerApiUrl } from '@/lib/api'
+import { ShieldAlert } from 'lucide-react'
 
 async function getCompanyIntelligence(id: string) {
-  const { userId, getToken } = await auth()
-  
-  if (!userId) {
-    return null
+  let token: string | null = null
+  try {
+    const authObj = await getAuth()
+    token = (await authObj.getToken()) || 'demo_token'
+  } catch {
+    token = 'demo_token'
   }
-
-  const token = await getToken()
 
   const apiUrl = getServerApiUrl()
   const response = await fetch(`${apiUrl}/api/v1/companies/${id}/intelligence`, {
@@ -38,14 +38,30 @@ export default async function CompanyDossierPage({ params }: { params: Promise<{
   const data = await getCompanyIntelligence(id)
 
   if (!data) {
-    redirect('/dashboard')
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-200 p-8 flex items-center justify-center">
+        <div className="panel max-w-lg w-full p-8 border-surface-elevated text-center space-y-4">
+          <div className="inline-flex p-3 rounded-full bg-risk-critical/10 text-risk-critical border border-risk-critical/30 mb-2">
+            <ShieldAlert size={24} />
+          </div>
+          <h1 className="text-xl font-light uppercase tracking-wider text-slate-100">
+            ORGANIZATION DOSSIER NOT FOUND
+          </h1>
+          <p className="font-mono text-xs text-slate-400 leading-relaxed">
+            The requested organization record could not be retrieved from the intelligence database.
+          </p>
+          <div className="flex justify-center gap-3 pt-2">
+            <Link href="/analyze" className="btn-primary text-xs">← INITIATE AUDIT</Link>
+            <Link href="/dashboard" className="btn-ghost text-xs border border-surface-elevated">DASHBOARD</Link>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   const { company, risk, verification, related_jobs, associated_recruiters, community_feed } = data
   
-  const communityReportsCount = community_feed?.reports?.filter((r: any) => r.company_name === company.name).length || 0
-
-
+  const communityReportsCount = community_feed?.reports?.filter((r: any) => r.company_name === company?.name).length || 0
 
   const getResultColor = (result: string) => {
     switch (result) {
@@ -65,6 +81,12 @@ export default async function CompanyDossierPage({ params }: { params: Promise<{
     }
   }
 
+  const companyVerdict = risk.score >= 60
+    ? "High risk organization profile: elevated threat associations, unverified domain channels, or recurring risk signals."
+    : risk.score > 20
+      ? "Moderate risk organization profile: partial domain verification or non-standard corporate channel records."
+      : "Verified corporate identity: domain records and historical activity conform to authentic recruitment standards."
+
   return (
     <div className="flex-1 p-8">
       <div className="max-w-4xl mx-auto space-y-8">
@@ -76,26 +98,29 @@ export default async function CompanyDossierPage({ params }: { params: Promise<{
           <Link href="/analyze" className="btn-ghost text-sm border border-surface-elevated">← NEW ANALYSIS</Link>
         </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="md:col-span-1">
-            <RiskVisualization score={risk.score} level={risk.level} confidence={95} />
-          </div>
+        {/* Full-width composite risk visualization */}
+        <RiskVisualization 
+          score={risk.score || 0} 
+          level={risk.level || 'LOW'} 
+          confidence={95} 
+          oneSentenceExplanation={companyVerdict}
+        />
 
-          <div className="md:col-span-2 panel p-0 border-surface-elevated">
-            <h2 className="tech-label text-slate-500 border-b border-surface-elevated p-6 mb-0">IDENTITY</h2>
-            <div className="p-6 space-y-4 font-mono text-sm text-slate-300">
-              <div className="grid grid-cols-3 gap-2 pb-4 border-b border-surface-elevated/50">
-                <span className="text-slate-500 uppercase tracking-widest text-xs">Normalized Name:</span>
-                <span className="col-span-2 text-slate-200">{company.name}</span>
-              </div>
-              <div className="grid grid-cols-3 gap-2 pb-4 border-b border-surface-elevated/50">
-                <span className="text-slate-500 uppercase tracking-widest text-xs">Official Domain:</span>
-                <span className="col-span-2 text-slate-200">{company.domain || "Unknown"}</span>
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                <span className="text-slate-500 uppercase tracking-widest text-xs">Verification State:</span>
-                <span className={`col-span-2 font-bold ${getResultColor(verification.status)}`}>{verification.status.replace(/_/g, ' ')}</span>
-              </div>
+        {/* Identity Section */}
+        <div className="panel p-0 border-surface-elevated">
+          <h2 className="tech-label text-slate-500 border-b border-surface-elevated p-6 mb-0">IDENTITY & DOMAIN PROVENANCE</h2>
+          <div className="p-6 space-y-4 font-mono text-sm text-slate-300">
+            <div className="grid grid-cols-3 gap-2 pb-4 border-b border-surface-elevated/50">
+              <span className="text-slate-500 uppercase tracking-widest text-xs">Normalized Name:</span>
+              <span className="col-span-2 text-slate-200">{company.name || "Unknown Organization"}</span>
+            </div>
+            <div className="grid grid-cols-3 gap-2 pb-4 border-b border-surface-elevated/50">
+              <span className="text-slate-500 uppercase tracking-widest text-xs">Official Domain:</span>
+              <span className="col-span-2 text-slate-200">{company.domain || "No official domain recorded"}</span>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <span className="text-slate-500 uppercase tracking-widest text-xs">Verification State:</span>
+              <span className={`col-span-2 font-bold ${getResultColor(verification.status)}`}>{(verification.status || 'UNVERIFIED').replace(/_/g, ' ')}</span>
             </div>
           </div>
         </div>

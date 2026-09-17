@@ -35,7 +35,7 @@ HireShield is a **threat-intelligence platform** for job seekers. It analyzes jo
 | Framework | [FastAPI](https://fastapi.tiangolo.com/) |
 | Database | PostgreSQL 15 + `pgvector` (via `ankane/pgvector`) |
 | ORM | [SQLAlchemy](https://www.sqlalchemy.org/) (async) + [Alembic](https://alembic.sqlalchemy.org/) |
-| AI | Google Generative AI (Gemini 1.5 Flash / Pro) |
+| AI | Google Generative AI (`gemini-2.5-flash`) |
 | Auth | Clerk JWT verification |
 
 ---
@@ -89,7 +89,9 @@ cd backend
 python -m venv .venv
 source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-# Set DATABASE_URI in your shell or .env pointing at a local Postgres instance
+# Set DATABASE_URI pointing to your Postgres instance (use localhost:5432, NOT the Docker hostname 'db')
+export DATABASE_URI=postgresql+asyncpg://postgres:postgres@localhost:5432/hireshield
+# On Windows PowerShell: $env:DATABASE_URI="postgresql+asyncpg://postgres:postgres@localhost:5432/hireshield"
 alembic upgrade head
 uvicorn app.main:app --reload --port 8000
 ```
@@ -141,7 +143,7 @@ PostgreSQL + pgvector
 ### Key design decisions
 - **AI is extraction-only.** Gemini quotes evidence verbatim; it never assigns scores.
 - **Risk scoring is deterministic.** `backend/app/risk/engine.py` applies fixed weights per signal category, producing reproducible scores.
-- **SSRF protection.** All external URLs are validated against an allowlist before fetching.
+- **SSRF protection.** All external URLs are validated against private, internal, and link-local IP addresses (DNS resolution and public IP verification) before fetching.
 - **Reduced-motion support.** All Framer Motion animations respect `prefers-reduced-motion`.
 
 ---

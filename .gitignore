@@ -14,6 +14,10 @@ backend/**/__pycache__/
 backend/.pytest_cache/
 .pytest_cache/
 backend/test.db
+backend/hireshield.db
+*.db
+*.sqlite
+*.sqlite3
 *.egg-info/
 dist/
 build/

@@ -15,8 +15,7 @@ function useCountUp(target: number, duration = 1400, startDelay = 400, active = 
   const prefersReduced = useReducedMotion()
 
   useEffect(() => {
-    if (!active) return
-    if (prefersReduced) { setValue(target); return }
+    if (!active || prefersReduced) return
     let start: number | null = null
     const timeout = setTimeout(() => {
       const animate = (ts: number) => {
@@ -33,7 +32,7 @@ function useCountUp(target: number, duration = 1400, startDelay = 400, active = 
     return () => clearTimeout(timeout)
   }, [active, target, duration, startDelay, prefersReduced])
 
-  return value
+  return prefersReduced ? (active ? target : 0) : value
 }
 
 // SVG ring

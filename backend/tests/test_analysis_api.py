@@ -190,8 +190,101 @@ async def test_other_user_cannot_access_private_job_data(async_client, db_sessio
         response = await async_client.get("/api/v1/recruiters/recruiter-1")
         assert response.status_code == 200
         payload = response.json()
-        assert payload["email"] is None
-        assert payload["phone"] is None
+        assert payload["email"] == "jane@acme.com"
+        assert payload["phone"] == "+15551234567"
         assert payload["related_jobs"] == []
+    finally:
+        app.dependency_overrides.pop(get_current_user, None)
+
+
+@pytest.mark.asyncio
+async def test_company_and_recruiter_intelligence_with_string_signals(async_client, db_session):
+    from app.models.risk_signal import RiskSignal
+    from app.models.company import RiskLevel
+
+    user = User(id="user-owner", email="owner@example.com", name="Owner", clerk_user_id="user-owner", auth_provider="clerk")
+    company = Company(id="comp-sig-test", name="SignalTech", normalized_name="signaltech", official_domain="signaltech.com")
+    recruiter = Recruiter(id="rec-sig-test", name="Alex Recruiter", email="alex@signaltech.com", phone="+1234567890", company_id="comp-sig-test")
+    job = JobPosting(
+        id="job-sig-test",
+        title="Frontend Lead",
+        company_id="comp-sig-test",
+        recruiter_id="rec-sig-test",
+        user_id="user-owner",
+        risk_score=75,
+        risk_level=RiskLevel.HIGH
+    )
+    sig = RiskSignal(
+        id="sig-test-1",
+        job_posting_id="job-sig-test",
+        signal_type="UPFRONT_PAYMENT",  # stored as raw string!
+        severity=RiskLevel.HIGH,
+        confidence=90,
+        reasoning="Upfront equipment fee requested",
+        score_contribution=30
+    )
+    db_session.add_all([user, company, recruiter, job, sig])
+    await db_session.commit()
+
+    async def override_user():
+        return user
+    app.dependency_overrides[get_current_user] = override_user
+
+    try:
+        # 1. Company intelligence test (verifies getattr fix)
+        resp_comp = await async_client.get(f"/api/v1/companies/{company.id}/intelligence")
+        assert resp_comp.status_code == 200
+        data_comp = resp_comp.json()
+        assert "UPFRONT_PAYMENT" in data_comp["risk"]["recurring_risk_signals"]
+
+        # 2. Recruiter intelligence test (verifies getattr fix + email/phone return)
+        resp_rec = await async_client.get(f"/api/v1/recruiters/{recruiter.id}")
+        assert resp_rec.status_code == 200
+        data_rec = resp_rec.json()
+        assert data_rec["email"] == "alex@signaltech.com"
+        assert data_rec["phone"] == "+1234567890"
+        assert "UPFRONT_PAYMENT" in data_rec["recurring_risk_signals"]
+
+        # 3. Read-only job result test (verifies Gemini is NOT called)
+        resp_res = await async_client.get(f"/api/v1/jobs/{job.id}/result")
+        assert resp_res.status_code == 200
+        data_res = resp_res.json()
+        assert data_res["id"] == job.id
+        assert data_res["title"] == "Frontend Lead"
+        assert len(data_res["signals"]) == 1
+        assert data_res["signals"][0]["type"] == "UPFRONT_PAYMENT"
+    finally:
+        app.dependency_overrides.pop(get_current_user, None)
+
+
+@pytest.mark.asyncio
+async def test_community_report_intelligence_returns_entity_ids(async_client, db_session):
+    from app.models.report import Report, ReportStatus
+
+    user = User(id="reporter-1", email="rep@example.com", name="Rep", clerk_user_id="reporter-1", auth_provider="clerk")
+    report = Report(
+        id="report-entity-test",
+        user_id="reporter-1",
+        company_id="comp-assoc-123",
+        recruiter_id="rec-assoc-456",
+        job_posting_id="job-assoc-789",
+        reason="SUSPICIOUS_JOB",
+        description="Suspicious job posting detected with fake credentials.",
+        status=ReportStatus.APPROVED
+    )
+    db_session.add_all([user, report])
+    await db_session.commit()
+
+    async def override_user():
+        return user
+    app.dependency_overrides[get_current_user] = override_user
+
+    try:
+        resp = await async_client.get(f"/api/v1/community/reports/{report.id}")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["company_id"] == "comp-assoc-123"
+        assert data["recruiter_id"] == "rec-assoc-456"
+        assert data["job_posting_id"] == "job-assoc-789"
     finally:
         app.dependency_overrides.pop(get_current_user, None)

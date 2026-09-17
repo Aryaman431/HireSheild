@@ -75,7 +75,7 @@ def _validate_pdf(file_bytes: bytes) -> None:
         raise HTTPException(status_code=400, detail="Uploaded PDF is invalid or unreadable.")
 
 @router.post("/analyze-file", response_model=AnalyzeJobResponse)
-@limiter.limit("10/hour")
+@limiter.limit("60/hour")
 async def analyze_job_file(
     request: Request,
     file: UploadFile = File(...),
@@ -119,7 +119,7 @@ async def analyze_job_file(
         )
 
 @router.post("/analyze", response_model=AnalyzeJobResponse)
-@limiter.limit("10/hour")
+@limiter.limit("60/hour")
 async def analyze_job(
     request: Request,
     analyze_request: AnalyzeJobRequest,
@@ -162,20 +162,16 @@ async def get_job_result(
     db: AsyncSession = Depends(get_db)
 ):
     """
-    Fetch the result of a job analysis.
+    Fetch the result of a job analysis without initializing AI models.
     """
-    # Note: In a full system, we should enforce ownership here. 
-    # For Phase 6 MVP, we fetch the result.
-    service = AnalysisService(GeminiProvider(), db)
-    result = await service.get_analysis_result(job_id)
-    
+    job = await db.get(JobPosting, job_id)
+    if not job or job.user_id != current_user.id:
+        raise HTTPException(status_code=404, detail="Analysis result not found")
+
+    result = await AnalysisService.get_analysis_result(db, job_id)
     if not result:
         raise HTTPException(status_code=404, detail="Analysis result not found")
-        
-    job = await db.get(JobPosting, job_id)
-    if job and job.user_id != current_user.id:
-        raise HTTPException(status_code=404, detail="Analysis result not found")
-        
+
     return result
 
 from app.models.verification_check import VerificationCheck

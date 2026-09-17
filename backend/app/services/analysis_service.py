@@ -18,16 +18,23 @@ from app.risk.aggregation import RiskAggregation
 from app.risk.rules import RiskSignalType, get_signal_score
 
 class AnalysisService:
-    def __init__(self, ai_provider: AIProvider, db: AsyncSession):
+    def __init__(self, ai_provider: AIProvider | None = None, db: AsyncSession | None = None):
         self.ai = ai_provider
         self.db = db
-        self.company_service = CompanyService(db)
-        self.recruiter_service = RecruiterService(db)
-        self.verification_service = VerificationService(db)
-        self.historical_service = HistoricalService(db)
-        
-        provider = GeminiEmbeddingProvider()
-        self.embedding_service = EmbeddingService(provider, db)
+        self.company_service = CompanyService(db) if db else None
+        self.recruiter_service = RecruiterService(db) if db else None
+        self.verification_service = VerificationService(db) if db else None
+        self.historical_service = HistoricalService(db) if db else None
+        self._embedding_service = None
+
+    @property
+    def embedding_service(self) -> EmbeddingService:
+        if self._embedding_service is None:
+            if not self.db:
+                raise RuntimeError("Database session required for embedding service.")
+            provider = GeminiEmbeddingProvider()
+            self._embedding_service = EmbeddingService(provider, self.db)
+        return self._embedding_service
 
     async def analyze_job_text(self, text: str) -> str:
         """
@@ -234,16 +241,22 @@ class AnalysisService:
         
         # 11. Historical Intelligence (Fail-safe)
         try:
-            await self.db.refresh(job, ['risk_signals'])
+            from sqlalchemy.orm import selectinload
+            from sqlalchemy.future import select
+            res_sigs = await self.db.execute(
+                select(RiskSignal)
+                .options(selectinload(RiskSignal.evidence_items))
+                .where(RiskSignal.job_posting_id == job.id)
+            )
+            job_signals = res_sigs.scalars().all()
             emb_id = await self.embedding_service.generate_and_persist_job_embedding(
                 job=job,
-                signals=job.risk_signals,
+                signals=job_signals,
                 company_name=company.name if company else None
             )
             
             if emb_id:
                 from app.models.embedding import Embedding
-                from sqlalchemy.future import select
                 result = await self.db.execute(select(Embedding).where(Embedding.id == emb_id))
                 emb = result.scalar_one_or_none()
                 if emb and emb.vector:
@@ -277,9 +290,10 @@ class AnalysisService:
         except Exception as e:
             print(f"Historical intelligence failed (non-fatal): {e}")
 
-    async def get_analysis_result(self, job_id: str) -> dict:
+    @staticmethod
+    async def get_analysis_result(db: AsyncSession, job_id: str) -> dict | None:
         """
-        Retrieves the aggregated analysis result for the frontend.
+        Retrieves the aggregated analysis result for the frontend without requiring AI initialization.
         """
         from sqlalchemy.orm import selectinload
         from sqlalchemy.future import select
@@ -287,7 +301,7 @@ class AnalysisService:
         from app.models.company import Company
         from app.models.recruiter import Recruiter
         
-        result = await self.db.execute(
+        result = await db.execute(
             select(JobPosting)
             .options(
                 selectinload(JobPosting.risk_signals).selectinload(RiskSignal.evidence_items),

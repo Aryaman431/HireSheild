@@ -74,16 +74,38 @@ async def test_duplicate_report(db_session: AsyncSession, test_user: User):
     # First report
     await ReportService.create_report(db_session, test_user.id, report_data)
     
-    # Duplicate report
+    # Duplicate report (normalized whitespace/case)
     report_data_2 = ReportCreate(
         job_posting_id="job_1",
         reason=ReportCategory.FAKE_JOB_POSTING,
-        description="This looks like a fake job... yes."
+        description="  this looks like a fake job.  "
     )
     
     with pytest.raises(HTTPException) as excinfo:
         await ReportService.create_report(db_session, test_user.id, report_data_2)
     assert excinfo.value.status_code == 409
+
+
+@pytest.mark.asyncio
+async def test_different_report_with_similar_length_is_allowed(db_session: AsyncSession, test_user: User):
+    db_session.add(JobPosting(id="job_2"))
+    await db_session.commit()
+    report_data_1 = ReportCreate(
+        job_posting_id="job_2",
+        reason=ReportCategory.FAKE_JOB_POSTING,
+        description="This job posting requires payment for tools."
+    )
+    await ReportService.create_report(db_session, test_user.id, report_data_1)
+
+    # Different report on same job with similar length (within 50 chars)
+    report_data_2 = ReportCreate(
+        job_posting_id="job_2",
+        reason=ReportCategory.FAKE_JOB_POSTING,
+        description="Recruiter demanded my full SSN over WhatsApp."
+    )
+    second_report = await ReportService.create_report(db_session, test_user.id, report_data_2)
+    assert second_report is not None
+    assert second_report.id is not None
 
 
 @pytest.mark.asyncio
