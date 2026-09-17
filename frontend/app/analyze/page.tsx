@@ -210,6 +210,11 @@ export default function AnalyzePage() {
       }
 
       const apiUrl = getBrowserApiUrl()
+      if (!apiUrl) {
+        throw new Error(
+          "Backend API URL is not configured. Please define NEXT_PUBLIC_API_URL in your Vercel Project Settings (Environment Variables) and redeploy."
+        )
+      }
       
       let response: Response;
       
@@ -253,9 +258,16 @@ export default function AnalyzePage() {
     } catch (err) {
       const error = err as Error
       clearInterval(stageInterval)
-      setError(error.name === 'TypeError'
-        ? "Unable to reach the analysis service. Please make sure the backend is running on port 8000."
-        : error.message || "An unexpected error occurred during analysis.")
+      const apiUrl = getBrowserApiUrl()
+      let friendlyMessage = error.message
+      if (error.name === 'TypeError' || error.message?.toLowerCase().includes('failed to fetch')) {
+        if (!apiUrl || apiUrl.includes('localhost')) {
+          friendlyMessage = "Unable to reach analysis service. The backend URL is either unset or pointing to localhost. Please configure NEXT_PUBLIC_API_URL in Vercel to your live Render backend URL and trigger a redeploy."
+        } else {
+          friendlyMessage = `Unable to connect to analysis service at ${apiUrl}. Please ensure your Render backend is active and that CORS_ORIGINS allows your Vercel deployment domain.`
+        }
+      }
+      setError(friendlyMessage || "An unexpected error occurred during analysis.")
       setIsAnalyzing(false)
       setLoadingStage(0)
     }
