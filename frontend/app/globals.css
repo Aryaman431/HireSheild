@@ -1,28 +1,29 @@
 @import "tailwindcss";
+@layer theme, base, clerk, components, utilities;
+
+@custom-variant dark (&:is(.dark *));
 
 @theme {
-  --color-brand-50: #eff6ff;
-  --color-brand-100: #dbeafe;
-  --color-brand-200: #bfdbfe;
-  --color-brand-300: #93c5fd;
-  --color-brand-400: #60a5fa;
-  --color-brand-500: #3b82f6;
-  --color-brand-600: #2563eb;
-  --color-brand-700: #1d4ed8;
-  --color-brand-900: #1e3a8a;
-
   /* HireShield Risk Colors */
   --color-risk-critical: #ff2a2a;
   --color-risk-high: #ff7326;
   --color-risk-suspicious: #ffb703;
   --color-risk-low: #10b981;
   --color-risk-verified: #06b6d4;
-  --color-risk-moderate: #ffb703;
 
-  /* Custom dark theme colors for investigation aesthetic */
-  --color-surface: #0f172a; /* slate-900 */
-  --color-surface-raised: #1e293b; /* slate-800 */
-  --color-surface-elevated: #334155; /* slate-700 */
+  --color-brand-400: #60a5fa;
+  --color-brand-500: #3b82f6;
+
+  /* Theme variables mapping */
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-text-muted: var(--text-muted);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
 
   --font-sans: "Avenir Next", Avenir, "Segoe UI", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "SFMono-Regular", Menlo, Monaco, Consolas, ui-monospace, monospace;
@@ -30,13 +31,32 @@
 
 @layer base {
   :root {
-    --background: #020617; /* slate-950 */
-    --foreground: #f8fafc; /* slate-50 */
+    --background: #f8fafc;
+    --surface: #ffffff;
+    --surface-raised: #f1f5f9;
+    --surface-elevated: #e2e8f0;
+    --border: #cbd5e1;
+    --text: #0f172a;
+    --text-muted: #475569;
+    --primary: #0f172a;
+    --primary-foreground: #ffffff;
+  }
+
+  .dark {
+    --background: #020617;
+    --surface: #0f172a;
+    --surface-raised: #1e293b;
+    --surface-elevated: #334155;
+    --border: #334155;
+    --text: #f8fafc;
+    --text-muted: #94a3b8;
+    --primary: #f8fafc;
+    --primary-foreground: #020617;
   }
 
   body {
     background-color: var(--background);
-    color: var(--foreground);
+    color: var(--text);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -54,9 +74,16 @@
     background-size: 180px 180px;
   }
 
+  .dark body::after {
+    opacity: 0.028;
+  }
+  :root body::after {
+    opacity: 0.015; /* Lighter noise in light mode */
+  }
+
   ::selection {
     background: rgb(59 130 246 / 0.35);
-    color: white;
+    color: var(--primary-foreground);
   }
 
   /* Scrollbar styling for a tech-tool feel */
@@ -85,12 +112,12 @@
 
   /* Technical Label */
   .tech-label {
-    @apply text-xs font-mono text-slate-400 uppercase tracking-widest mb-1 block;
+    @apply text-xs font-mono text-text-muted uppercase tracking-widest mb-1 block;
   }
 
   /* Technical Value */
   .tech-value {
-    @apply text-sm font-mono text-slate-200;
+    @apply text-sm font-mono text-text;
   }
 
   /* Badge */
@@ -115,12 +142,12 @@
 
   /* Ghost Button */
   .btn-ghost {
-    @apply px-4 py-2 rounded-sm border border-transparent font-mono text-xs font-bold tracking-wider uppercase text-slate-400 hover:text-slate-100 hover:border-surface-elevated transition-colors duration-200 focus:outline-none focus:ring-1 focus:ring-slate-500;
+    @apply px-4 py-2 rounded-sm border border-transparent font-mono text-xs font-bold tracking-wider uppercase text-text-muted hover:text-text hover:border-border transition-colors duration-200 focus:outline-none focus:ring-1 focus:ring-border;
   }
 
   /* Primary Button */
   .btn-primary {
-    @apply px-4 py-2 rounded-sm font-mono text-xs font-bold tracking-wider uppercase bg-slate-100 text-slate-900 hover:bg-white transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-950 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply px-4 py-2 rounded-sm font-mono text-xs font-bold tracking-wider uppercase bg-primary text-primary-foreground hover:opacity-90 transition-opacity duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50;
   }
 }
 
@@ -137,20 +164,20 @@
 }
 
 .eyebrow {
-  @apply mb-2 flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400;
+  @apply mb-2 flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-text-muted;
 }
 
 .eyebrow::before {
   content: "";
-  @apply h-1.5 w-1.5 rounded-sm bg-slate-500;
+  @apply h-1.5 w-1.5 rounded-sm bg-text-muted;
 }
 
 .input-field {
-  @apply w-full rounded-sm border border-surface-elevated bg-surface px-4 py-3 text-sm text-slate-200 outline-none transition placeholder:text-slate-600 focus:border-brand-500;
+  @apply w-full rounded-sm border border-border bg-surface px-4 py-3 text-sm text-text outline-none transition placeholder:text-text-muted focus:border-brand-500;
 }
 
 .data-card {
-  @apply rounded-sm border border-surface-elevated bg-surface p-4 transition-colors hover:border-slate-500;
+  @apply rounded-sm border border-border bg-surface p-4 transition-colors hover:border-text-muted;
 }
 
 /* =====================================================
@@ -160,8 +187,8 @@
 /* Subtle technical grid background */
 .intel-grid {
   background-image:
-    linear-gradient(rgba(51, 65, 85, 0.12) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(51, 65, 85, 0.12) 1px, transparent 1px);
+    linear-gradient(var(--color-border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-border) 1px, transparent 1px);
   background-size: 40px 40px;
 }
 

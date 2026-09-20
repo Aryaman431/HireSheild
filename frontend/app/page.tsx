@@ -1,6 +1,5 @@
 'use client'
 
-import { useAuth } from '@/lib/auth'
 import Link from 'next/link'
 import AnimatedBackground from '@/components/AnimatedBackground'
 import HeroSection from '@/components/HeroSection'
@@ -62,8 +61,6 @@ const FLOW_STEPS = [
 const EVIDENCE_TEXT = '"Congratulations! You have been selected for an exclusive remote position. Please submit a one-time equipment setup fee of $200 via Zelle to proceed with onboarding."'
 
 export default function Home() {
-  const { userId } = useAuth()
-
   return (
     <div className="flex-1 flex flex-col relative overflow-hidden bg-background intel-grid">
       {/* Animated canvas scanline background */}
@@ -72,7 +69,7 @@ export default function Home() {
       {/* ============================================================
           HERO SECTION
           ============================================================ */}
-      <HeroSection isSignedIn={!!userId} />
+      <HeroSection />
 
       {/* ============================================================
           DEMO INVESTIGATION PANEL
@@ -85,14 +82,14 @@ export default function Home() {
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className="h-2 w-2 rounded-full bg-risk-critical animate-ping" />
-              <h2 className="tech-label text-slate-400 m-0">LIVE INVESTIGATION CASE PREVIEW</h2>
+              <h2 className="tech-label text-text-muted m-0">LIVE INVESTIGATION CASE PREVIEW</h2>
             </div>
-            <p className="text-xs font-mono text-slate-500">
+            <p className="text-xs font-mono text-text-muted">
               Examining simulated fraudulent offer letter & domain cross-check
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-[10px] font-mono text-slate-400 uppercase tracking-widest bg-surface-elevated/40 border border-surface-elevated px-2.5 py-1 rounded-sm">
+            <span className="text-[10px] font-mono text-text-muted uppercase tracking-widest bg-surface-elevated/40 border border-border px-2.5 py-1 rounded-sm">
               SAMPLE THREAT FILE
             </span>
             <Link 
@@ -116,11 +113,11 @@ export default function Home() {
                   CASE #4F8A2D
                 </span>
               </div>
-              <span className="text-slate-500 flex items-center gap-1">
+              <span className="text-text-muted flex items-center gap-1">
                 STATUS: COMPLETE
                 <span
                   aria-hidden="true"
-                  className="inline-block w-[2px] h-[1em] bg-slate-500 align-middle ml-0.5 animate-[blink_1s_step-end_infinite]"
+                  className="inline-block w-[2px] h-[1em] bg-text-muted align-middle ml-0.5 animate-[blink_1s_step-end_infinite]"
                 />
               </span>
             </div>
@@ -130,13 +127,13 @@ export default function Home() {
               <div className="lg:col-span-7 p-5 md:p-6 space-y-6">
                 {/* Target info */}
                 <SectionReveal delay={0.1}>
-                  <span className="tech-label text-slate-500 mb-2">TARGET ENTITY</span>
+                  <span className="tech-label text-text-muted mb-2">TARGET ENTITY</span>
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
                     <div>
-                      <h3 className="text-lg font-bold text-slate-100 tracking-wide uppercase">
+                      <h3 className="text-lg font-bold text-text tracking-wide uppercase">
                         Junior Software Developer
                       </h3>
-                      <span className="text-sm font-mono text-slate-400">Acme Technologies</span>
+                      <span className="text-sm font-mono text-text-muted">Acme Technologies</span>
                     </div>
                     <span className="badge badge-critical shrink-0 glitch-hover" data-text="UNVERIFIED DOMAIN">
                       UNVERIFIED DOMAIN
@@ -144,7 +141,7 @@ export default function Home() {
                   </div>
                 </SectionReveal>
 
-                <div className="border-t border-surface-elevated" />
+                <div className="border-t border-border" />
 
                 {/* Risk signals */}
                 <div>
@@ -158,9 +155,9 @@ export default function Home() {
 
                 {/* Evidence — typewriter effect */}
                 <SectionReveal delay={0.2}>
-                  <div className="bg-surface border border-surface-elevated rounded-sm p-4">
-                    <span className="tech-label text-slate-500 mb-2">EXTRACTED EVIDENCE</span>
-                    <p className="text-xs font-mono text-slate-300 border-l-2 border-surface-elevated pl-3 py-1">
+                  <div className="bg-surface border border-border rounded-sm p-4">
+                    <span className="tech-label text-text-muted mb-2">EXTRACTED EVIDENCE</span>
+                    <p className="text-xs font-mono text-text border-l-2 border-border pl-3 py-1">
                       <TypewriterText text={EVIDENCE_TEXT} speed={22} startDelay={600} />
                     </p>
                   </div>
@@ -174,7 +171,7 @@ export default function Home() {
 
                 {/* Intelligence cross-check */}
                 <div>
-                  <span className="tech-label text-slate-500 mb-3">INTELLIGENCE CROSS-CHECK</span>
+                  <span className="tech-label text-text-muted mb-3">INTELLIGENCE CROSS-CHECK</span>
                   <div className="space-y-2">
                     {CROSS_CHECKS.map((item, i) => (
                       <CrossCheckRow key={item.label} item={item} index={i} />
@@ -192,11 +189,12 @@ export default function Home() {
           ============================================================ */}
       <section
         id="how-it-works"
-        className="relative z-10 w-full max-w-6xl mx-auto px-6 py-12 md:py-16 border-t border-surface-elevated"
+        className="relative z-10 w-full max-w-6xl mx-auto px-6 py-12 md:py-16 border-t border-border"
       >
         <SectionReveal className="mb-10">
-          <span className="tech-label text-slate-500 mb-2">INVESTIGATION FLOW</span>
-          <p className="text-xs font-mono text-slate-600 mt-1">
+          <span className="tech-label text-text-muted mb-2">INVESTIGATION FLOW</span>
+          <h2 className="text-2xl md:text-3xl font-light text-text uppercase tracking-wide my-3">Automated Intelligence Pipeline</h2>
+          <p className="text-xs font-mono text-text-muted mt-1">
             Five-stage automated analysis pipeline
           </p>
         </SectionReveal>
@@ -208,14 +206,14 @@ export default function Home() {
           FOOTER CTA
           ============================================================ */}
       <SectionReveal className="relative z-10 w-full max-w-6xl mx-auto px-6 pb-20">
-        <div className="text-center border-t border-surface-elevated pt-12">
-          <p className="text-slate-400 font-mono text-sm mb-6 max-w-lg mx-auto">
+        <div className="text-center border-t border-border pt-12">
+          <p className="text-text-muted font-mono text-sm mb-6 max-w-lg mx-auto">
             HireShield is an evidence-driven platform. Every risk score is explainable,
             every signal is traceable, and no claim goes unverified.
           </p>
           <Link
             href="/analyze"
-            className="group relative overflow-hidden inline-flex items-center gap-2 px-10 py-3 rounded-sm bg-slate-100 text-slate-900 font-mono text-xs font-bold tracking-widest uppercase transition-all duration-200 hover:scale-[1.02] hover:bg-white focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-950"
+            className="group relative overflow-hidden inline-flex items-center gap-2 px-10 py-3 rounded-sm bg-primary text-primary-foreground font-mono text-xs font-bold tracking-widest uppercase transition-all duration-200 hover:scale-[1.02] hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"
           >
             <span
               aria-hidden="true"

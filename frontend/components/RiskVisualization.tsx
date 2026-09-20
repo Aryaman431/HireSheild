@@ -82,7 +82,7 @@ export default function RiskVisualization({
         
         {/* Left Column: Radial Meter */}
         <div className="p-6 lg:w-5/12 flex flex-col items-center justify-center bg-surface-raised/20 text-center relative">
-          <span className="tech-label text-slate-400 mb-4 self-start">COMPOSITE RISK ENGINE</span>
+          <span className="tech-label text-text-muted mb-4 self-start">COMPOSITE RISK ENGINE</span>
           
           <div className="relative flex items-center justify-center my-2">
             <svg width="150" height="150" viewBox="0 0 150 150" className="-rotate-90">
@@ -118,7 +118,7 @@ export default function RiskVisualization({
               <span className={`text-5xl font-light font-mono tracking-tighter ${theme.text} leading-none`}>
                 {score}
               </span>
-              <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest mt-1">
+              <span className="text-[10px] font-mono text-text-muted uppercase tracking-widest mt-1">
                 OUT OF 100
               </span>
             </div>
@@ -134,22 +134,22 @@ export default function RiskVisualization({
         <div className="p-6 lg:w-7/12 flex flex-col justify-between">
           <div>
             <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-              <span className="text-xs font-mono font-bold tracking-wider text-slate-300 uppercase">
+              <span className="text-xs font-mono font-bold tracking-wider text-text uppercase">
                 {theme.label}
               </span>
-              <div className="flex items-center gap-2 font-mono text-xs text-slate-400 bg-surface-elevated/40 px-2.5 py-1 rounded-sm border border-surface-elevated">
-                <span className="text-slate-500">ENGINE CONFIDENCE:</span>
-                <span className="text-slate-200 font-bold">{confidence}%</span>
+              <div className="flex items-center gap-2 font-mono text-xs text-text-muted bg-surface-elevated/40 px-2.5 py-1 rounded-sm border border-border">
+                <span className="text-text-muted">ENGINE CONFIDENCE:</span>
+                <span className="text-text font-bold">{confidence}%</span>
               </div>
             </div>
 
             {/* Segmented Threat Tier Bar */}
             <div className="my-4">
-              <div className="grid grid-cols-4 gap-1.5 text-[10px] font-mono text-slate-400 mb-1.5 text-center">
-                <span className={score <= 20 ? 'text-emerald-400 font-bold' : 'text-slate-600'}>0-20 LOW</span>
-                <span className={score > 20 && score <= 60 ? 'text-amber-400 font-bold' : 'text-slate-600'}>21-60 MOD</span>
-                <span className={score > 60 && score <= 80 ? 'text-orange-400 font-bold' : 'text-slate-600'}>61-80 HIGH</span>
-                <span className={score > 80 ? 'text-red-400 font-bold' : 'text-slate-600'}>81-100 CRIT</span>
+              <div className="grid grid-cols-4 gap-1.5 text-[10px] font-mono text-text-muted mb-1.5 text-center">
+                <span className={score <= 20 ? 'text-emerald-400 font-bold' : 'text-text-muted'}>0-20 LOW</span>
+                <span className={score > 20 && score <= 60 ? 'text-amber-400 font-bold' : 'text-text-muted'}>21-60 MOD</span>
+                <span className={score > 60 && score <= 80 ? 'text-orange-400 font-bold' : 'text-text-muted'}>61-80 HIGH</span>
+                <span className={score > 80 ? 'text-red-400 font-bold' : 'text-text-muted'}>81-100 CRIT</span>
               </div>
 
               <div className="grid grid-cols-4 gap-1.5 h-2">
@@ -161,20 +161,20 @@ export default function RiskVisualization({
             </div>
 
             {/* One-Sentence Explanation Callout */}
-            <div className="mt-4 p-3.5 bg-surface-raised/40 rounded-sm border border-surface-elevated">
-              <div className="flex items-center gap-1.5 text-[10px] font-mono text-slate-400 uppercase tracking-wider font-bold mb-1.5">
+            <div className="mt-4 p-3.5 bg-surface-raised/40 rounded-sm border border-border">
+              <div className="flex items-center gap-1.5 text-[10px] font-mono text-text-muted uppercase tracking-wider font-bold mb-1.5">
                 <Info size={12} className={theme.text} />
                 <span>EXECUTIVE VERDICT &bull; ONE-SENTENCE EXPLANATION</span>
               </div>
-              <p className="text-xs sm:text-sm font-mono text-slate-100 font-medium leading-relaxed">
+              <p className="text-xs sm:text-sm font-mono text-text font-medium leading-relaxed">
                 {oneSentenceExplanation || theme.summary}
               </p>
             </div>
           </div>
 
-          <div className="mt-4 pt-3 border-t border-surface-elevated/60 flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono text-slate-500">
+          <div className="mt-4 pt-3 border-t border-border/60 flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono text-text-muted">
             <span>METHODOLOGY: HEURISTIC ANALYSIS + HISTORICAL PGVECTOR SIMILARITY</span>
-            <span className="text-slate-400">EXPLAINABLE RISK ENGINE</span>
+            <span className="text-text-muted">EXPLAINABLE RISK ENGINE</span>
           </div>
         </div>
 

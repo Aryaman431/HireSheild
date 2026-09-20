@@ -14,17 +14,17 @@ export default function Page() {
 
   return (
     <div className="flex-1 flex items-center justify-center min-h-[calc(100vh-3.5rem)] py-12 px-4">
-      <div className="panel max-w-md w-full p-8 border border-surface-elevated text-center space-y-6">
+      <div className="panel max-w-md w-full p-8 border border-border text-center space-y-6">
         <div className="mx-auto w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
           <ShieldCheck size={24} />
         </div>
         
         <div>
-          <span className="tech-label text-slate-400 mb-1">REGISTRATION SUBSYSTEM</span>
-          <h1 className="text-xl font-mono font-bold uppercase tracking-wider text-slate-100">
+          <span className="tech-label text-text-muted mb-1">REGISTRATION SUBSYSTEM</span>
+          <h1 className="text-xl font-mono font-bold uppercase tracking-wider text-text">
             DEMO ACCESS ACTIVE
           </h1>
-          <p className="text-xs font-mono text-slate-400 mt-2 leading-relaxed">
+          <p className="text-xs font-mono text-text-muted mt-2 leading-relaxed">
             HireShield is running in demo mode. All deep threat analysis tools, entity verification checks, and historical databases are unlocked without registration.
           </p>
         </div>

@@ -24,30 +24,17 @@ const DemoAuthContext = createContext<DemoAuthContextType>({
   getToken: async () => 'demo_token',
 })
 
+import { getClerkAppearance } from './clerk-appearance'
+import { useTheme } from 'next-themes'
+
+
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   if (isClerkConfigured()) {
     return (
-      <RealClerkProvider
-        appearance={{
-          variables: {
-            colorPrimary: '#64748b',
-            colorBackground: '#020617',
-            borderRadius: '2px',
-          },
-          elements: {
-            card: 'border border-[#1e293b]',
-            headerTitle: 'font-mono uppercase tracking-widest text-lg',
-            headerSubtitle: 'font-mono text-xs text-slate-400',
-            formButtonPrimary: 'font-mono font-bold uppercase tracking-widest bg-slate-800 hover:bg-slate-700 text-slate-300',
-            socialButtonsBlockButton: 'font-mono text-xs border border-slate-800 hover:bg-slate-900',
-            formFieldLabel: 'font-mono text-xs uppercase tracking-widest text-slate-500',
-            formFieldInput: 'font-mono text-sm border-slate-800 focus:border-slate-500',
-            footerActionLink: 'font-mono text-slate-400 hover:text-slate-300',
-          }
-        }}
-      >
+      <ClerkThemeWrapper>
         {children}
-      </RealClerkProvider>
+      </ClerkThemeWrapper>
     )
   }
 
@@ -126,5 +113,16 @@ export function SignOutButton({ children }: { children?: React.ReactNode }) {
     <Link href="/" className="inline-flex">
       {children}
     </Link>
+  )
+}
+
+function ClerkThemeWrapper({ children }: { children: React.ReactNode }) {
+  const { resolvedTheme } = useTheme()
+  const theme = resolvedTheme === 'dark' ? 'dark' : 'light'
+
+  return (
+    <RealClerkProvider appearance={getClerkAppearance(theme)}>
+      {children}
+    </RealClerkProvider>
   )
 }

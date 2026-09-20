@@ -48,15 +48,15 @@ export default function SignalCard({ signal, index }: SignalCardProps) {
         borderColor: cfg.borderHover,
         transition: { duration: 0.18 },
       }}
-      className="flex items-start gap-3 p-3 bg-surface border border-surface-elevated rounded-sm cursor-default"
+      className="flex items-start gap-3 p-3 bg-surface border border-border rounded-sm cursor-default"
       style={{ willChange: 'transform, box-shadow' }}
     >
       <span className={`badge ${cfg.badgeClass} shrink-0 mt-0.5`}>
         {signal.severity}
       </span>
       <div className="min-w-0">
-        <div className="text-sm font-bold text-slate-200 uppercase">{signal.label}</div>
-        <div className="text-xs font-mono text-slate-400 mt-1">{signal.detail}</div>
+        <div className="text-sm font-bold text-text uppercase">{signal.label}</div>
+        <div className="text-xs font-mono text-text-muted mt-1">{signal.detail}</div>
       </div>
     </motion.div>
   )

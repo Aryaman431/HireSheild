@@ -285,25 +285,25 @@ export default function AnalyzePage() {
         <motion.div 
           initial={{ opacity: 0, scale: 0.96 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="panel flex w-full max-w-2xl flex-col gap-6 p-6 sm:p-8 border border-surface-elevated bg-slate-950/90 shadow-2xl relative overflow-hidden"
+          className="panel flex w-full max-w-2xl flex-col gap-6 p-6 sm:p-8 border border-border bg-background/90 shadow-2xl relative overflow-hidden"
         >
           {/* Subtle scanning beam animation */}
           <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,transparent_0%,rgba(59,130,246,0.06)_50%,transparent_100%)] animate-[pulse_2s_ease-in-out_infinite]" />
 
           {/* Scanner Header */}
-          <div className="flex items-center justify-between border-b border-surface-elevated pb-4">
+          <div className="flex items-center justify-between border-b border-border pb-4">
             <div className="flex items-center gap-3">
               <div className="h-3 w-3 rounded-full bg-cyan-400 animate-ping" />
               <div>
-                <h2 className="tech-label m-0 text-slate-200">DEFENSIVE ANALYSIS ENGINE</h2>
-                <p className="text-[10px] font-mono text-slate-500 uppercase tracking-wider">
+                <h2 className="tech-label m-0 text-text">DEFENSIVE ANALYSIS ENGINE</h2>
+                <p className="text-[10px] font-mono text-text-muted uppercase tracking-wider">
                   DEEP RECRUITMENT THREAT SCAN
                 </p>
               </div>
             </div>
             <div className="text-right font-mono">
               <span className="text-xs font-bold text-brand-400">{progressPercent}% COMPLETE</span>
-              <span className="block text-[10px] text-slate-500">STAGE {loadingStage + 1} OF {LOADING_STAGES.length}</span>
+              <span className="block text-[10px] text-text-muted">STAGE {loadingStage + 1} OF {LOADING_STAGES.length}</span>
             </div>
           </div>
 
@@ -330,7 +330,7 @@ export default function AnalyzePage() {
                     isCurrent 
                       ? 'bg-brand-500/10 border border-brand-500/30 text-white' 
                       : isPast 
-                        ? 'text-slate-500 bg-surface/40' 
+                        ? 'text-text-muted bg-surface/40' 
                         : 'text-slate-700'
                   }`}
                 >
@@ -341,10 +341,10 @@ export default function AnalyzePage() {
                       ) : isCurrent ? (
                         <Loader2 size={14} className="text-cyan-400 animate-spin" />
                       ) : (
-                        <span className="h-1.5 w-1.5 rounded-full bg-slate-700" />
+                        <span className="h-1.5 w-1.5 rounded-full bg-surface-elevated" />
                       )}
                     </div>
-                    <span className={isCurrent ? 'font-bold tracking-wide text-slate-100' : ''}>
+                    <span className={isCurrent ? 'font-bold tracking-wide text-text' : ''}>
                       {String(idx + 1).padStart(2, '0')}. {stage.name}
                     </span>
                   </div>
@@ -355,7 +355,7 @@ export default function AnalyzePage() {
                     ) : isCurrent ? (
                       <span className="text-cyan-400 font-bold animate-pulse">PROCESSING</span>
                     ) : (
-                      <span className="text-slate-600">QUEUED</span>
+                      <span className="text-text-muted">QUEUED</span>
                     )}
                   </span>
                 </div>
@@ -364,10 +364,10 @@ export default function AnalyzePage() {
           </div>
 
           {/* Live Telemetry Log Box */}
-          <div className="p-3 bg-surface border border-surface-elevated rounded font-mono text-xs flex items-center gap-2 text-slate-400">
+          <div className="p-3 bg-surface border border-border rounded font-mono text-xs flex items-center gap-2 text-text-muted">
             <Terminal size={14} className="text-brand-400 shrink-0" />
-            <span className="text-slate-500 font-bold shrink-0">[TELEMETRY]:</span>
-            <span className="truncate text-slate-300">{currentStage.log}</span>
+            <span className="text-text-muted font-bold shrink-0">[TELEMETRY]:</span>
+            <span className="truncate text-text">{currentStage.log}</span>
           </div>
         </motion.div>
       </div>
@@ -387,28 +387,28 @@ export default function AnalyzePage() {
               <p className="eyebrow m-0">INVESTIGATION WORKBENCH</p>
             </div>
             <h1 className="text-3xl font-light tracking-wide text-white uppercase">Inspect an Opportunity</h1>
-            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-400 font-mono">
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-text-muted font-mono">
               Paste a job posting, upload an offer letter PDF, or analyze a recruiter email screenshot. HireShield will extract hidden claims, verify domains, and highlight fraudulent signals.
             </p>
           </div>
-          <div className="hidden rounded-sm border border-surface-elevated bg-surface px-4 py-3 text-right sm:block">
-            <p className="text-[10px] font-mono uppercase tracking-widest text-slate-500">Security Guarantee</p>
-            <p className="mt-1 text-xs font-mono text-slate-300">Confidential / Zero Logging</p>
+          <div className="hidden rounded-sm border border-border bg-surface px-4 py-3 text-right sm:block">
+            <p className="text-[10px] font-mono uppercase tracking-widest text-text-muted">Security Guarantee</p>
+            <p className="mt-1 text-xs font-mono text-text">Confidential / Zero Logging</p>
           </div>
         </header>
 
         {/* ============================================================
             DEMO PRESET SELECTOR (FOR FAST JUDGE TESTING)
             ============================================================ */}
-        <div className="rounded-sm border border-surface-elevated bg-surface/80 p-4 sm:p-5">
+        <div className="rounded-sm border border-border bg-surface/80 p-4 sm:p-5">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Sparkles size={14} className="text-amber-400" />
-              <span className="text-xs font-mono font-bold text-slate-300 uppercase tracking-wider">
+              <span className="text-xs font-mono font-bold text-text uppercase tracking-wider">
                 QUICK-LOAD DEMO PRESETS (1-CLICK TEST CASES)
               </span>
             </div>
-            <span className="text-[10px] font-mono text-slate-500 uppercase">
+            <span className="text-[10px] font-mono text-text-muted uppercase">
               SELECT TO INSTANTLY TEST
             </span>
           </div>
@@ -422,23 +422,23 @@ export default function AnalyzePage() {
                 className={`text-left p-3 rounded-sm border transition-all flex flex-col justify-between ${
                   loadedPreset === preset.title
                     ? 'border-brand-400 bg-brand-500/10 shadow-sm'
-                    : 'border-surface-elevated bg-surface-raised/40 hover:border-slate-500 hover:bg-surface-raised'
+                    : 'border-border bg-surface-raised/40 hover:border-slate-500 hover:bg-surface-raised'
                 }`}
               >
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-xs font-mono font-bold text-slate-200">
+                    <span className="text-xs font-mono font-bold text-text">
                       {preset.title.split(' ')[1]} {preset.title.split(' ')[2] || ''}
                     </span>
                     <span className={`badge ${preset.badgeClass} text-[9px]`}>
                       {preset.badge}
                     </span>
                   </div>
-                  <p className="text-[11px] font-mono text-slate-400 line-clamp-2 leading-relaxed">
+                  <p className="text-[11px] font-mono text-text-muted line-clamp-2 leading-relaxed">
                     {preset.preview}
                   </p>
                 </div>
-                <div className="mt-3 pt-2 border-t border-surface-elevated/50 flex items-center justify-between text-[10px] font-mono text-slate-500">
+                <div className="mt-3 pt-2 border-t border-border/50 flex items-center justify-between text-[10px] font-mono text-text-muted">
                   <span>LOAD SAMPLE DATA</span>
                   <span className="text-brand-400">→</span>
                 </div>
@@ -448,7 +448,7 @@ export default function AnalyzePage() {
         </div>
 
         {/* Input Format Tabs */}
-        <div className="inline-flex w-full gap-1 rounded-sm border border-surface-elevated bg-surface p-1 sm:w-auto">
+        <div className="inline-flex w-full gap-1 rounded-sm border border-border bg-surface p-1 sm:w-auto">
           {[
             { id: 'TEXT' as const, label: 'RAW TEXT', icon: FileText },
             { id: 'IMAGE' as const, label: 'SCREENSHOT', icon: ImageIcon },
@@ -467,7 +467,7 @@ export default function AnalyzePage() {
                 className={`flex items-center justify-center gap-2 rounded-sm px-5 py-2.5 text-xs font-mono font-bold transition ${
                   activeTab === tab.id 
                     ? 'bg-surface-elevated text-white shadow-sm'
-                    : 'text-slate-400 hover:bg-surface-raised hover:text-slate-200'
+                    : 'text-text-muted hover:bg-surface-raised hover:text-text'
                 }`}
               >
                 <Icon size={13} />
@@ -478,7 +478,7 @@ export default function AnalyzePage() {
         </div>
 
         {/* Main Form Panel */}
-        <div className="panel p-5 sm:p-7 border border-surface-elevated">
+        <div className="panel p-5 sm:p-7 border border-border">
           <form onSubmit={handleAnalyze} className="flex flex-col gap-6">
             
             {activeTab === 'TEXT' && (
@@ -500,13 +500,13 @@ export default function AnalyzePage() {
                           setText('')
                           setLoadedPreset(null)
                         }}
-                        className="text-xs font-mono text-slate-500 hover:text-slate-300 flex items-center gap-1"
+                        className="text-xs font-mono text-text-muted hover:text-text flex items-center gap-1"
                       >
                         <Trash2 size={11} />
                         <span>CLEAR</span>
                       </button>
                     )}
-                    <span className={`text-xs font-mono ${text.length < 50 ? 'text-slate-500' : 'text-emerald-400'}`}>
+                    <span className={`text-xs font-mono ${text.length < 50 ? 'text-text-muted' : 'text-emerald-400'}`}>
                       {text.length} / 50 min chars
                     </span>
                   </div>
@@ -539,7 +539,7 @@ export default function AnalyzePage() {
                       ? 'border-brand-400 bg-brand-500/10'
                       : file 
                         ? 'border-slate-500 bg-surface-raised' 
-                        : 'border-surface-elevated hover:border-slate-500 hover:bg-surface-raised cursor-pointer'
+                        : 'border-border hover:border-slate-500 hover:bg-surface-raised cursor-pointer'
                   }`}
                 >
                   <input 
@@ -555,8 +555,8 @@ export default function AnalyzePage() {
                       <div className="h-10 w-10 rounded-full bg-brand-500/10 border border-brand-500/30 flex items-center justify-center text-brand-400">
                         <FileText size={20} />
                       </div>
-                      <div className="text-slate-200 font-mono text-sm font-bold">{file.name}</div>
-                      <div className="text-slate-500 font-mono text-xs">{(file.size / 1024 / 1024).toFixed(2)} MB</div>
+                      <div className="text-text font-mono text-sm font-bold">{file.name}</div>
+                      <div className="text-text-muted font-mono text-xs">{(file.size / 1024 / 1024).toFixed(2)} MB</div>
                       <button 
                         type="button" 
                         onClick={(e) => {
@@ -570,13 +570,13 @@ export default function AnalyzePage() {
                     </div>
                   ) : (
                     <div className="flex flex-col items-center gap-3">
-                      <div className="h-10 w-10 rounded-full bg-surface-elevated/40 flex items-center justify-center text-slate-400">
+                      <div className="h-10 w-10 rounded-full bg-surface-elevated/40 flex items-center justify-center text-text-muted">
                         <UploadCloud size={20} />
                       </div>
-                      <div className="text-slate-300 font-mono text-sm">
+                      <div className="text-text font-mono text-sm">
                         Drag and drop your {activeTab.toLowerCase()} here, or click to browse
                       </div>
-                      <div className="text-slate-500 font-mono text-xs">
+                      <div className="text-text-muted font-mono text-xs">
                         Allowed: {activeTab === 'IMAGE' ? 'PNG, JPEG, WEBP' : 'PDF'} • Maximum size: 10MB
                       </div>
                     </div>
@@ -595,9 +595,9 @@ export default function AnalyzePage() {
               </div>
             )}
 
-            <div className="flex flex-col-reverse gap-4 border-t border-surface-elevated/70 pt-5 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-center gap-2 text-xs text-slate-500 font-mono">
-                <Shield size={12} className="text-slate-600" />
+            <div className="flex flex-col-reverse gap-4 border-t border-border/70 pt-5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-2 text-xs text-text-muted font-mono">
+                <Shield size={12} className="text-text-muted" />
                 <span>Audited against 14 automated threat signals. Never input passwords.</span>
               </div>
               <button 
@@ -605,7 +605,7 @@ export default function AnalyzePage() {
                 className="btn-primary flex shrink-0 items-center justify-center gap-2 py-3 px-6 shadow-md"
               >
                 <span>INITIATE ANALYSIS</span>
-                <span className="text-slate-900 font-bold">→</span>
+                <span className="text-primary-foreground font-bold">→</span>
               </button>
             </div>
           </form>

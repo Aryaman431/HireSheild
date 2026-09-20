@@ -1,6 +1,6 @@
 'use client'
 
-import { motion, useReducedMotion } from 'framer-motion'
+import { motion, useReducedMotion, useInView } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
 
 interface RiskCardProps {
@@ -17,6 +17,8 @@ function useCountUp(target: number, duration = 1400, startDelay = 400, active = 
   useEffect(() => {
     if (!active || prefersReduced) return
     let start: number | null = null
+    let animationFrameId: number
+
     const timeout = setTimeout(() => {
       const animate = (ts: number) => {
         if (!start) start = ts
@@ -25,14 +27,23 @@ function useCountUp(target: number, duration = 1400, startDelay = 400, active = 
         // easeOutCubic
         const eased = 1 - Math.pow(1 - progress, 3)
         setValue(Math.round(eased * target))
-        if (progress < 1) requestAnimationFrame(animate)
+        
+        if (progress < 1) {
+          animationFrameId = requestAnimationFrame(animate)
+        } else {
+          setValue(target) // Ensure it ends on real value
+        }
       }
-      requestAnimationFrame(animate)
+      animationFrameId = requestAnimationFrame(animate)
     }, startDelay)
-    return () => clearTimeout(timeout)
+    
+    return () => {
+      clearTimeout(timeout)
+      if (animationFrameId) cancelAnimationFrame(animationFrameId)
+    }
   }, [active, target, duration, startDelay, prefersReduced])
 
-  return prefersReduced ? (active ? target : 0) : value
+  return prefersReduced ? target : value
 }
 
 // SVG ring
@@ -48,18 +59,7 @@ function scoreColor(score: number) {
 export default function RiskCard({ score, level, confidence }: RiskCardProps) {
   const prefersReduced = useReducedMotion()
   const ref = useRef<HTMLDivElement>(null)
-  const [active, setActive] = useState(false)
-
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const obs = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) { setActive(true); obs.disconnect() } },
-      { threshold: 0.4 }
-    )
-    obs.observe(el)
-    return () => obs.disconnect()
-  }, [])
+  const active = useInView(ref, { once: true, margin: '-20px' })
 
   const displayed = useCountUp(score, 1400, 350, active)
   const color = scoreColor(score)
@@ -67,7 +67,7 @@ export default function RiskCard({ score, level, confidence }: RiskCardProps) {
   const dashoffset = CIRCUMFERENCE * (1 - fraction)
 
   return (
-    <div ref={ref} className="bg-surface border border-surface-elevated rounded-sm p-4 text-center relative overflow-hidden">
+    <div ref={ref} className="bg-surface border border-border rounded-sm p-4 text-center relative overflow-hidden">
       {/* Scan-line sweep on mount */}
       {!prefersReduced && active && (
         <motion.div
@@ -79,7 +79,7 @@ export default function RiskCard({ score, level, confidence }: RiskCardProps) {
         />
       )}
 
-      <span className="tech-label text-slate-500 mb-3">RISK ASSESSMENT</span>
+      <span className="tech-label text-text-muted mb-3">RISK ASSESSMENT</span>
 
       {/* SVG ring */}
       <div className="relative flex items-center justify-center mx-auto w-32 h-32 my-2">
@@ -110,7 +110,7 @@ export default function RiskCard({ score, level, confidence }: RiskCardProps) {
           <span className="text-4xl font-light leading-none" style={{ color }}>
             {displayed}
           </span>
-          <span className="text-[9px] font-mono text-slate-500 mt-0.5 uppercase tracking-widest">
+          <span className="text-[9px] font-mono text-text-muted mt-0.5 uppercase tracking-widest">
             RISK SCORE
           </span>
         </div>
@@ -138,7 +138,7 @@ export default function RiskCard({ score, level, confidence }: RiskCardProps) {
         {level}
       </motion.div>
 
-      <span className="text-xs font-mono text-slate-400 block uppercase">
+      <span className="text-xs font-mono text-text-muted block uppercase">
         CONFIDENCE: {confidence}%
       </span>
     </div>

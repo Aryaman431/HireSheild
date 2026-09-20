@@ -73,7 +73,7 @@ export default function ReportOpportunityForm({ jobId, companyId, recruiterId, a
     return (
       <div className="w-full mt-6 border border-risk-critical/30 bg-risk-critical/5 p-4 rounded font-mono">
         <h3 className="text-risk-critical font-bold mb-2">REPORT SUBMITTED</h3>
-        <p className="text-slate-400 text-sm">
+        <p className="text-text-muted text-sm">
           Thank you for contributing to community intelligence. 
           Your report is currently PENDING review.
         </p>
@@ -84,21 +84,21 @@ export default function ReportOpportunityForm({ jobId, companyId, recruiterId, a
   return (
     <div className="w-full mt-6 border border-risk-critical/50 bg-surface p-6 rounded-sm">
       <div className="flex justify-between items-start mb-4">
-        <h3 className="tech-label text-risk-critical border-b border-surface-elevated pb-1 w-full text-left">REPORT OPPORTUNITY</h3>
-        <button onClick={() => setIsOpen(false)} className="text-slate-500 hover:text-slate-300 ml-4">✕</button>
+        <h3 className="tech-label text-risk-critical border-b border-border pb-1 w-full text-left">REPORT OPPORTUNITY</h3>
+        <button onClick={() => setIsOpen(false)} className="text-text-muted hover:text-text ml-4">✕</button>
       </div>
 
-      <p className="text-xs text-slate-400 font-mono mb-4 bg-surface-raised p-2 border-l-2 border-slate-500">
+      <p className="text-xs text-text-muted font-mono mb-4 bg-surface-raised p-2 border-l-2 border-slate-500">
         Reports are reviewed before being included in community intelligence.
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-4 font-mono text-sm">
         <div>
-          <label className="block text-slate-500 mb-1">Why are you reporting this?</label>
+          <label className="block text-text-muted mb-1">Why are you reporting this?</label>
           <select 
             value={reason} 
             onChange={e => setReason(e.target.value)}
-            className="w-full bg-surface-elevated border border-surface-raised text-slate-200 p-2 rounded-sm"
+            className="w-full bg-surface-elevated border border-surface-raised text-text p-2 rounded-sm"
           >
             <option value="SUSPICIOUS_JOB">Suspicious Job</option>
             <option value="UPFRONT_PAYMENT">Upfront Payment Requested</option>
@@ -113,24 +113,24 @@ export default function ReportOpportunityForm({ jobId, companyId, recruiterId, a
         </div>
 
         <div>
-          <label className="block text-slate-500 mb-1">What happened?</label>
+          <label className="block text-text-muted mb-1">What happened?</label>
           <textarea 
             required
             minLength={10}
             maxLength={2000}
             value={description}
             onChange={e => setDescription(e.target.value)}
-            className="w-full bg-surface border border-surface-elevated text-slate-200 p-2 rounded-sm h-24"
+            className="w-full bg-surface border border-border text-text p-2 rounded-sm h-24"
             placeholder="Describe your experience..."
           />
         </div>
 
         <div>
-          <label className="block text-slate-500 mb-1">Evidence (Optional)</label>
+          <label className="block text-text-muted mb-1">Evidence (Optional)</label>
           <textarea 
             value={evidence}
             onChange={e => setEvidence(e.target.value)}
-            className="w-full bg-surface border border-surface-elevated text-slate-200 p-2 rounded-sm h-20"
+            className="w-full bg-surface border border-border text-text p-2 rounded-sm h-20"
             placeholder="Paste text evidence (emails, URLs, messages)"
           />
         </div>

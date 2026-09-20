@@ -43,24 +43,24 @@ export default function RiskSignalRow({ signal }: { signal: RiskSignalData }) {
   return (
     <div className={`flex flex-col gap-3.5 p-4 sm:p-5 rounded border ${sev.border} ${sev.bg} transition-all my-1.5`}>
       {/* 1. SEVERITY & SIGNAL NAME */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-surface-elevated/60 pb-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 pb-3">
         <div className="flex items-center gap-2.5">
-          <div className="p-1.5 rounded bg-surface border border-surface-elevated text-slate-300">
+          <div className="p-1.5 rounded bg-surface border border-border text-text">
             {renderSignalIcon(signal.type, isCritical || isHigh)}
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-mono text-slate-400 uppercase tracking-widest font-semibold">SEVERITY:</span>
+            <span className="text-[10px] font-mono text-text-muted uppercase tracking-widest font-semibold">SEVERITY:</span>
             <span className={`badge ${sev.badgeClass} font-bold`}>
               {sev.label}
             </span>
           </div>
-          <span className="font-bold text-slate-100 tracking-wide uppercase text-sm font-mono ml-1">
+          <span className="font-bold text-text tracking-wide uppercase text-sm font-mono ml-1">
             {signal.type ? signal.type.replace(/_/g, ' ') : 'SUSPICIOUS SIGNAL'}
           </span>
         </div>
 
         <div className="flex items-center gap-1.5 shrink-0">
-          <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest hidden sm:inline">RISK IMPACT:</span>
+          <span className="text-[10px] font-mono text-text-muted uppercase tracking-widest hidden sm:inline">RISK IMPACT:</span>
           <span className={`font-mono text-xs font-bold px-2.5 py-0.5 rounded border ${
             isCritical || isHigh 
               ? 'text-risk-critical bg-risk-critical/10 border-risk-critical/30' 
@@ -73,29 +73,29 @@ export default function RiskSignalRow({ signal }: { signal: RiskSignalData }) {
 
       {/* 2. EXACT EVIDENCE */}
       {signal.evidence ? (
-        <div className="bg-surface border border-surface-elevated rounded p-3.5 relative overflow-hidden">
+        <div className="bg-surface border border-border rounded p-3.5 relative overflow-hidden">
           <div className="text-[10px] font-mono text-brand-400 uppercase tracking-wider font-bold mb-1.5 flex items-center gap-1.5">
             <Quote size={11} className="text-brand-400" />
             <span>EXACT EVIDENCE</span>
           </div>
-          <p className="text-xs sm:text-sm text-slate-200 font-mono italic leading-relaxed whitespace-pre-wrap border-l-2 border-brand-400 pl-3">
+          <p className="text-xs sm:text-sm text-text font-mono italic leading-relaxed whitespace-pre-wrap border-l-2 border-brand-400 pl-3">
             &ldquo;{signal.evidence}&rdquo;
           </p>
         </div>
       ) : (
-        <div className="bg-surface/50 border border-surface-elevated/60 rounded p-2.5 text-[11px] font-mono text-slate-400">
-          <span className="text-slate-500 font-bold uppercase tracking-wider mr-2">EXACT EVIDENCE:</span>
+        <div className="bg-surface/50 border border-border/60 rounded p-2.5 text-[11px] font-mono text-text-muted">
+          <span className="text-text-muted font-bold uppercase tracking-wider mr-2">EXACT EVIDENCE:</span>
           Identified via structural heuristic pattern analysis across posting metadata.
         </div>
       )}
 
       {/* 3. WHY IT MATTERS */}
-      <div className="bg-surface-raised/40 border border-surface-elevated rounded p-3.5">
-        <div className="text-[10px] font-mono text-slate-400 uppercase tracking-wider font-bold mb-1.5 flex items-center gap-1.5">
-          <Info size={11} className="text-slate-400" />
+      <div className="bg-surface-raised/40 border border-border rounded p-3.5">
+        <div className="text-[10px] font-mono text-text-muted uppercase tracking-wider font-bold mb-1.5 flex items-center gap-1.5">
+          <Info size={11} className="text-text-muted" />
           <span>WHY IT MATTERS</span>
         </div>
-        <p className="text-xs sm:text-sm text-slate-300 font-mono leading-relaxed">
+        <p className="text-xs sm:text-sm text-text font-mono leading-relaxed">
           {signal.reasoning}
         </p>
       </div>

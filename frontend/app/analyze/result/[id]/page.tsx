@@ -147,11 +147,11 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
         : 'Investigation could not be loaded. Please try again.'
 
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-200 p-8">
+      <div className="min-h-screen bg-background text-text p-8">
         <div className="max-w-2xl mx-auto mt-16 panel p-8">
-          <p className="tech-label text-slate-500">INVESTIGATION STATUS</p>
+          <p className="tech-label text-text-muted">INVESTIGATION STATUS</p>
           <h1 className="mt-3 text-3xl font-light tracking-wide text-white">Unable to load result</h1>
-          <p className="mt-4 text-slate-400">{message}</p>
+          <p className="mt-4 text-text-muted">{message}</p>
           <div className="mt-6 flex gap-3">
             <Link href="/analyze" className="btn-primary">Analyze another job</Link>
             <Link href="/dashboard" className="btn-ghost">Back to dashboard</Link>
@@ -232,7 +232,7 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
       ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30' 
       : c.result === 'SUSPICIOUS' 
         ? 'text-risk-critical bg-risk-critical/10 border-risk-critical/30' 
-        : 'text-slate-400 bg-slate-800 border-slate-700'
+        : 'text-text-muted bg-surface-raised border-border'
 
     evidenceItems.push({
       source: sourceLabel,
@@ -253,7 +253,7 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
         link: `https://${result.company.domain}`,
         linkLabel: `Visit ${result.company.domain}`,
         status: result.company.verification_status || 'UNVERIFIED',
-        badgeClass: result.company.verification_status === 'VERIFIED' ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30' : 'text-slate-400 bg-slate-800 border-slate-700'
+        badgeClass: result.company.verification_status === 'VERIFIED' ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30' : 'text-text-muted bg-surface-raised border-border'
       })
     }
 
@@ -263,7 +263,7 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
         finding: `Recruiter email registered as: ${result.recruiter.email} (Status: ${result.recruiter.verification_status || 'UNVERIFIED'})`,
         link: null,
         status: result.recruiter.verification_status || 'UNVERIFIED',
-        badgeClass: result.recruiter.verification_status === 'VERIFIED' ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30' : 'text-slate-400 bg-slate-800 border-slate-700'
+        badgeClass: result.recruiter.verification_status === 'VERIFIED' ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30' : 'text-text-muted bg-surface-raised border-border'
       })
     }
   }
@@ -293,14 +293,14 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-200 p-4 sm:p-8">
+    <div className="min-h-screen bg-background text-text p-4 sm:p-8">
       <div className="max-w-4xl mx-auto space-y-8">
         
         {/* Header */}
-        <header className="border-b border-surface-elevated pb-6 flex flex-col sm:flex-row justify-between sm:items-end gap-4">
+        <header className="border-b border-border pb-6 flex flex-col sm:flex-row justify-between sm:items-end gap-4">
           <div>
             <div className="flex flex-wrap items-center gap-2.5 mb-2">
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider bg-surface-elevated px-2.5 py-1 rounded-sm border border-slate-700 text-slate-300">
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider bg-surface-elevated px-2.5 py-1 rounded-sm border border-border text-text">
                 CASE #{result.id.substring(0, 8).toUpperCase()}
               </span>
               <span className="text-[10px] font-mono uppercase tracking-wider bg-brand-500/10 border border-brand-500/30 text-brand-400 px-2.5 py-1 rounded-sm">
@@ -310,10 +310,10 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
                 ANALYSIS COMPLETE
               </span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-light tracking-wide uppercase text-slate-100">
+            <h1 className="text-2xl sm:text-3xl font-light tracking-wide uppercase text-text">
               Investigation Dossier
             </h1>
-            <p className="text-slate-500 font-mono text-xs mt-1">
+            <p className="text-text-muted font-mono text-xs mt-1">
               UUID: {result.id}
             </p>
           </div>
@@ -338,15 +338,15 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
           />
 
           {/* 2. RED FLAGS & OBSERVED THREAT SIGNALS */}
-          <div className="panel p-0 border-surface-elevated bg-surface">
-            <div className="flex items-center justify-between border-b border-surface-elevated p-5 sm:p-6">
+          <div className="panel p-0 border-border bg-surface">
+            <div className="flex items-center justify-between border-b border-border p-5 sm:p-6">
               <div>
-                <h2 className="tech-label text-slate-400 m-0">RED FLAGS & OBSERVED THREAT SIGNALS</h2>
-                <p className="text-xs font-mono text-slate-500 mt-0.5">
+                <h2 className="tech-label text-text-muted m-0">RED FLAGS & OBSERVED THREAT SIGNALS</h2>
+                <p className="text-xs font-mono text-text-muted mt-0.5">
                   Algorithmically extracted claims evaluated with severity, exact evidence, and threat rationale
                 </p>
               </div>
-              <span className="text-xs font-mono font-bold bg-surface-elevated px-2.5 py-1 rounded text-slate-300">
+              <span className="text-xs font-mono font-bold bg-surface-elevated px-2.5 py-1 rounded text-text">
                 {signals.length} SIGNALS
               </span>
             </div>
@@ -356,10 +356,10 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
                 <div className="inline-flex items-center justify-center p-3 rounded-full bg-emerald-500/10 text-emerald-400 mb-3 border border-emerald-500/30">
                   <span className="text-lg font-bold font-mono">✓</span>
                 </div>
-                <h3 className="text-sm font-mono font-bold text-slate-200 uppercase mb-1">
+                <h3 className="text-sm font-mono font-bold text-text uppercase mb-1">
                   All Threat Heuristics Cleared
                 </h3>
-                <p className="text-xs font-mono text-slate-400 max-w-md mx-auto leading-relaxed">
+                <p className="text-xs font-mono text-text-muted max-w-md mx-auto leading-relaxed">
                   No deceptive patterns, upfront fee claims, or domain spoofing indicators were identified in this opportunity submission.
                 </p>
               </div>
@@ -384,24 +384,24 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
         />
 
         {/* 4. WEB EVIDENCE & INVESTIGATION SOURCES */}
-        <div className="panel p-0 border-surface-elevated bg-surface">
-          <div className="flex items-center justify-between border-b border-surface-elevated p-5 sm:p-6">
+        <div className="panel p-0 border-border bg-surface">
+          <div className="flex items-center justify-between border-b border-border p-5 sm:p-6">
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <Globe size={16} className="text-brand-400" />
-                <h2 className="tech-label text-slate-300 m-0">WEB EVIDENCE & INVESTIGATION SOURCES</h2>
+                <h2 className="tech-label text-text m-0">WEB EVIDENCE & INVESTIGATION SOURCES</h2>
               </div>
-              <p className="text-xs font-mono text-slate-500">
+              <p className="text-xs font-mono text-text-muted">
                 Authoritative external web traces, DNS records, safe HTTP inspection, and threat indexes
               </p>
             </div>
-            <span className="text-xs font-mono font-bold bg-surface-elevated px-2.5 py-1 rounded text-slate-300">
+            <span className="text-xs font-mono font-bold bg-surface-elevated px-2.5 py-1 rounded text-text">
               {evidenceItems.length} SOURCES
             </span>
           </div>
 
           {evidenceItems.length === 0 ? (
-            <div className="p-6 text-center text-xs font-mono text-slate-500">
+            <div className="p-6 text-center text-xs font-mono text-text-muted">
               No external web evidence sources registered for this case.
             </div>
           ) : (
@@ -410,14 +410,14 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
                 <div key={idx} className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-surface-raised/10 transition-colors">
                   <div className="space-y-1.5 flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-surface-raised border border-surface-elevated text-brand-400">
+                      <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-surface-raised border border-border text-brand-400">
                         {item.source}
                       </span>
                       <span className={`text-[10px] font-mono font-semibold px-2 py-0.5 rounded border ${item.badgeClass}`}>
                         {item.status}
                       </span>
                     </div>
-                    <p className="text-xs sm:text-sm font-mono text-slate-200 leading-relaxed break-words">
+                    <p className="text-xs sm:text-sm font-mono text-text leading-relaxed break-words">
                       {item.finding}
                     </p>
                   </div>
@@ -427,13 +427,13 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
                       href={item.link}
                       target={item.link.startsWith('http') ? '_blank' : undefined}
                       rel="noopener noreferrer"
-                      className="self-start sm:self-center shrink-0 flex items-center gap-1.5 text-xs font-mono text-brand-400 hover:text-brand-300 bg-surface-raised/40 hover:bg-surface-raised border border-surface-elevated hover:border-brand-500/50 px-3 py-1.5 rounded transition-all shadow-sm"
+                      className="self-start sm:self-center shrink-0 flex items-center gap-1.5 text-xs font-mono text-brand-400 hover:text-brand-300 bg-surface-raised/40 hover:bg-surface-raised border border-border hover:border-brand-500/50 px-3 py-1.5 rounded transition-all shadow-sm"
                     >
                       <span>{item.linkLabel || 'Inspect Source'}</span>
                       <ExternalLink size={12} />
                     </a>
                   ) : (
-                    <span className="text-[11px] font-mono text-slate-600 self-start sm:self-center shrink-0">
+                    <span className="text-[11px] font-mono text-text-muted self-start sm:self-center shrink-0">
                       Authoritative internal registry
                     </span>
                   )}
@@ -444,14 +444,14 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
         </div>
 
         {/* 5. RECOMMENDED ACTION: CLEAR SAFETY STEPS */}
-        <div className="panel p-6 border-surface-elevated bg-surface">
-          <div className="border-b border-surface-elevated pb-3 mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div className="panel p-6 border-border bg-surface">
+          <div className="border-b border-border pb-3 mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <ShieldAlert size={16} className={hasHighRiskSignals ? "text-risk-critical" : "text-brand-400"} />
-                <h2 className="tech-label text-slate-300 m-0">RECOMMENDED ACTION & SAFETY STEPS</h2>
+                <h2 className="tech-label text-text m-0">RECOMMENDED ACTION & SAFETY STEPS</h2>
               </div>
-              <p className="text-xs font-mono text-slate-500">
+              <p className="text-xs font-mono text-text-muted">
                 Actionable defensive protocols calibrated to identified threat heuristics
               </p>
             </div>
@@ -468,18 +468,18 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
                   <AlertOctagon size={14} />
                   <span>STEP 1 — CRITICAL PROHIBITIONS (DO NOT DO)</span>
                 </div>
-                <ul className="space-y-2.5 font-mono text-xs text-slate-300">
+                <ul className="space-y-2.5 font-mono text-xs text-text">
                   <li className="flex gap-2.5 items-start">
                     <span className="text-risk-critical font-bold text-sm leading-none">✕</span>
-                    <span><strong className="text-slate-100">DO NOT send money:</strong> Never pay fees via Zelle, wire, Apple Pay, Venmo, or cryptocurrency for equipment, software, or onboarding. Authentic employers never charge candidates.</span>
+                    <span><strong className="text-text">DO NOT send money:</strong> Never pay fees via Zelle, wire, Apple Pay, Venmo, or cryptocurrency for equipment, software, or onboarding. Authentic employers never charge candidates.</span>
                   </li>
                   <li className="flex gap-2.5 items-start">
                     <span className="text-risk-critical font-bold text-sm leading-none">✕</span>
-                    <span><strong className="text-slate-100">DO NOT conduct interviews on messaging apps:</strong> Decline interviews conducted solely via Telegram, Signal, WhatsApp, or Google Chat text messages.</span>
+                    <span><strong className="text-text">DO NOT conduct interviews on messaging apps:</strong> Decline interviews conducted solely via Telegram, Signal, WhatsApp, or Google Chat text messages.</span>
                   </li>
                   <li className="flex gap-2.5 items-start">
                     <span className="text-risk-critical font-bold text-sm leading-none">✕</span>
-                    <span><strong className="text-slate-100">DO NOT disclose sensitive credentials:</strong> Never submit your Social Security Number, passport scan, or direct deposit banking info before verifying official corporate onboarding.</span>
+                    <span><strong className="text-text">DO NOT disclose sensitive credentials:</strong> Never submit your Social Security Number, passport scan, or direct deposit banking info before verifying official corporate onboarding.</span>
                   </li>
                 </ul>
               </div>
@@ -491,7 +491,7 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
                 <ShieldCheck size={14} />
                 <span>STEP {hasHighRiskSignals ? '2' : '1'} — SAFE VERIFICATION ACTIONS</span>
               </div>
-              <ul className="space-y-2 font-mono text-xs text-slate-300">
+              <ul className="space-y-2 font-mono text-xs text-text">
                 {signals.map((s: {type: string}) => getRecommendation(s.type)).filter(Boolean).map((rec: string, i: number) => (
                   <li key={i} className="flex gap-2.5 items-start">
                     <span className="text-brand-400 font-bold text-sm leading-none">▸</span>
@@ -500,22 +500,22 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
                 ))}
                 <li className="flex gap-2.5 items-start">
                   <span className="text-brand-400 font-bold text-sm leading-none">▸</span>
-                  <span><strong className="text-slate-100">Verify company career page directly:</strong> Navigate independently to the company&apos;s verified domain and check for an active requisition matching this title.</span>
+                  <span><strong className="text-text">Verify company career page directly:</strong> Navigate independently to the company&apos;s verified domain and check for an active requisition matching this title.</span>
                 </li>
                 <li className="flex gap-2.5 items-start">
                   <span className="text-brand-400 font-bold text-sm leading-none">▸</span>
-                  <span><strong className="text-slate-100">Authenticate recruiter identity:</strong> Reach out to the employer&apos;s corporate HR desk or official switchboard to verify the recruiter&apos;s employment.</span>
+                  <span><strong className="text-text">Authenticate recruiter identity:</strong> Reach out to the employer&apos;s corporate HR desk or official switchboard to verify the recruiter&apos;s employment.</span>
                 </li>
               </ul>
             </div>
 
             {/* Step 3: Reporting & Escalation */}
-            <div className="p-4 rounded border border-surface-elevated bg-surface-raised/30 space-y-2.5">
-              <div className="flex items-center gap-2 text-slate-300 font-mono text-xs font-bold uppercase">
+            <div className="p-4 rounded border border-border bg-surface-raised/30 space-y-2.5">
+              <div className="flex items-center gap-2 text-text font-mono text-xs font-bold uppercase">
                 <Info size={14} />
                 <span>STEP {hasHighRiskSignals ? '3' : '2'} — REPORT & WARN PEERS</span>
               </div>
-              <p className="font-mono text-xs text-slate-400 leading-relaxed">
+              <p className="font-mono text-xs text-text-muted leading-relaxed">
                 If this job posting solicited fees, used deceptive redirects, or impersonated a legitimate business, submit a community report below to alert other job seekers and enrich the HireShield threat intelligence registry.
               </p>
             </div>
@@ -527,9 +527,9 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
           
           {/* Company Intelligence */}
           {result.company && (
-            <div className="panel p-6 border-surface-elevated bg-surface">
-              <div className="border-b border-surface-elevated pb-3 mb-4 flex justify-between items-center">
-                <span className="tech-label text-slate-400 m-0">COMPANY INTELLIGENCE</span>
+            <div className="panel p-6 border-border bg-surface">
+              <div className="border-b border-border pb-3 mb-4 flex justify-between items-center">
+                <span className="tech-label text-text-muted m-0">COMPANY INTELLIGENCE</span>
                 <Link 
                   href={`/companies/${result.company.id}`} 
                   className="text-xs font-mono text-brand-400 hover:text-brand-300 transition-colors flex items-center gap-1"
@@ -540,18 +540,18 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
               </div>
 
               <div className="space-y-3.5 text-xs font-mono">
-                <div className="flex items-center justify-between p-2.5 rounded bg-surface-raised/30 border border-surface-elevated">
-                  <span className="text-slate-500">ENTITY NAME:</span>
-                  <span className="text-slate-200 font-bold truncate max-w-[200px]">{result.company.name}</span>
+                <div className="flex items-center justify-between p-2.5 rounded bg-surface-raised/30 border border-border">
+                  <span className="text-text-muted">ENTITY NAME:</span>
+                  <span className="text-text font-bold truncate max-w-[200px]">{result.company.name}</span>
                 </div>
 
-                <div className="flex items-center justify-between p-2.5 rounded bg-surface-raised/30 border border-surface-elevated">
-                  <span className="text-slate-500">RESOLVED DOMAIN:</span>
+                <div className="flex items-center justify-between p-2.5 rounded bg-surface-raised/30 border border-border">
+                  <span className="text-text-muted">RESOLVED DOMAIN:</span>
                   <span className="text-brand-400 font-bold truncate max-w-[200px]">{result.company.domain || "Unknown Domain"}</span>
                 </div>
 
-                <div className="flex items-center justify-between p-2.5 rounded bg-surface-raised/30 border border-surface-elevated">
-                  <span className="text-slate-500">VERIFICATION:</span>
+                <div className="flex items-center justify-between p-2.5 rounded bg-surface-raised/30 border border-border">
+                  <span className="text-text-muted">VERIFICATION:</span>
                   <span className={
                     result.company.verification_status === 'VERIFIED'
                       ? 'badge badge-verified'
@@ -568,9 +568,9 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
 
           {/* Recruiter Intelligence */}
           {result.recruiter && (
-            <div className="panel p-6 border-surface-elevated bg-surface">
-              <div className="border-b border-surface-elevated pb-3 mb-4 flex justify-between items-center">
-                <span className="tech-label text-slate-400 m-0">RECRUITER INTELLIGENCE</span>
+            <div className="panel p-6 border-border bg-surface">
+              <div className="border-b border-border pb-3 mb-4 flex justify-between items-center">
+                <span className="tech-label text-text-muted m-0">RECRUITER INTELLIGENCE</span>
                 <Link 
                   href={`/recruiters/${result.recruiter.id}`} 
                   className="text-xs font-mono text-brand-400 hover:text-brand-300 transition-colors flex items-center gap-1"
@@ -581,18 +581,18 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
               </div>
 
               <div className="space-y-3.5 text-xs font-mono">
-                <div className="flex items-center justify-between p-2.5 rounded bg-surface-raised/30 border border-surface-elevated">
-                  <span className="text-slate-500">RECRUITER NAME:</span>
-                  <span className="text-slate-200 font-bold truncate max-w-[200px]">{result.recruiter.name || "Unknown Identity"}</span>
+                <div className="flex items-center justify-between p-2.5 rounded bg-surface-raised/30 border border-border">
+                  <span className="text-text-muted">RECRUITER NAME:</span>
+                  <span className="text-text font-bold truncate max-w-[200px]">{result.recruiter.name || "Unknown Identity"}</span>
                 </div>
 
-                <div className="flex items-center justify-between p-2.5 rounded bg-surface-raised/30 border border-surface-elevated">
-                  <span className="text-slate-500">EMAIL CHANNEL:</span>
+                <div className="flex items-center justify-between p-2.5 rounded bg-surface-raised/30 border border-border">
+                  <span className="text-text-muted">EMAIL CHANNEL:</span>
                   <span className="text-brand-400 font-bold truncate max-w-[200px]">{result.recruiter.email || "Unknown Email"}</span>
                 </div>
 
-                <div className="flex items-center justify-between p-2.5 rounded bg-surface-raised/30 border border-surface-elevated">
-                  <span className="text-slate-500">VERIFICATION:</span>
+                <div className="flex items-center justify-between p-2.5 rounded bg-surface-raised/30 border border-border">
+                  <span className="text-text-muted">VERIFICATION:</span>
                   <span className={
                     result.recruiter.verification_status === 'VERIFIED'
                       ? 'badge badge-verified'
@@ -610,11 +610,11 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
 
         {/* Community Intelligence Section */}
         {approvedReportsCount > 0 && (
-          <div className="panel p-6 border-surface-elevated bg-surface">
-            <h2 className="tech-label text-slate-400 border-b border-surface-elevated pb-3 mb-4">
+          <div className="panel p-6 border-border bg-surface">
+            <h2 className="tech-label text-text-muted border-b border-border pb-3 mb-4">
               COMMUNITY DEFENSE INTELLIGENCE
             </h2>
-            <div className="text-xs font-mono text-slate-300 space-y-3">
+            <div className="text-xs font-mono text-text space-y-3">
               <div className="p-3 bg-risk-critical/10 border border-risk-critical/30 rounded text-risk-critical font-bold flex items-center gap-2">
                 <span className="h-2 w-2 rounded-full bg-risk-critical animate-ping" />
                 <span>{approvedReportsCount} approved community fraud report(s) are actively linked to this target entity.</span>
@@ -628,11 +628,11 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
 
         {/* Historical Intelligence Section */}
         {historicalData?.available && historicalData.similar_opportunities?.length > 0 && (
-          <div className="panel p-6 border-surface-elevated bg-surface">
-            <div className="flex items-center justify-between border-b border-surface-elevated pb-3 mb-4">
+          <div className="panel p-6 border-border bg-surface">
+            <div className="flex items-center justify-between border-b border-border pb-3 mb-4">
               <div>
-                <h2 className="tech-label text-slate-400 m-0">HISTORICAL THREAT INTELLIGENCE (PGVECTOR MATCHES)</h2>
-                <p className="text-xs font-mono text-slate-500 mt-0.5">
+                <h2 className="tech-label text-text-muted m-0">HISTORICAL THREAT INTELLIGENCE (PGVECTOR MATCHES)</h2>
+                <p className="text-xs font-mono text-text-muted mt-0.5">
                   Semantic embedding comparison against known fraudulent campaign clusters
                 </p>
               </div>
@@ -641,7 +641,7 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
               </span>
             </div>
             
-            <div className="mb-6 space-y-3 text-xs text-slate-300 font-mono">
+            <div className="mb-6 space-y-3 text-xs text-text font-mono">
               {historicalData.pattern_summary.high_risk_count > 0 && (
                 <div className="border-l-2 border-brand-500 pl-3 py-2 bg-brand-500/10 text-brand-200 rounded-r">
                   ⚠️ {historicalData.pattern_summary.high_risk_count} of {historicalData.pattern_summary.similar_count} historically matched cases were verified as HIGH or CRITICAL recruitment fraud.
@@ -649,11 +649,11 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
               )}
 
               {historicalData.pattern_summary.common_signals?.length > 0 && (
-                <div className="p-3 bg-surface-raised/30 rounded border border-surface-elevated">
-                  <p className="text-slate-400 font-bold mb-2 uppercase">Recurring Signal Patterns in Cluster:</p>
+                <div className="p-3 bg-surface-raised/30 rounded border border-border">
+                  <p className="text-text-muted font-bold mb-2 uppercase">Recurring Signal Patterns in Cluster:</p>
                   <div className="flex flex-wrap gap-2">
                     {historicalData.pattern_summary.common_signals.map((sig: string) => (
-                      <span key={sig} className="px-2 py-0.5 rounded bg-surface border border-surface-elevated text-slate-300 text-[11px]">
+                      <span key={sig} className="px-2 py-0.5 rounded bg-surface border border-border text-text text-[11px]">
                         {sig.replace(/_/g, ' ')}
                       </span>
                     ))}
@@ -662,7 +662,7 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
               )}
             </div>
 
-            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest font-mono mb-3 border-b border-surface-elevated pb-1">
+            <h3 className="text-xs font-bold text-text-muted uppercase tracking-widest font-mono mb-3 border-b border-border pb-1">
               Top Correlated Threat Opportunities
             </h3>
             <div className="space-y-3">
@@ -671,16 +671,16 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
                 return (
                   <div 
                     key={cardKey} 
-                    className="p-3.5 border border-surface-elevated rounded bg-surface-raised/20 hover:border-slate-600 transition-colors"
+                    className="p-3.5 border border-border rounded bg-surface-raised/20 hover:border-border transition-colors"
                   >
                     <div className="flex justify-between items-start mb-1.5">
-                      <h4 className="font-mono text-xs font-bold text-slate-200 truncate">{opp.title || "Historical Opportunity"}</h4>
-                      <span className="text-[9px] font-bold uppercase tracking-wider bg-surface px-2 py-0.5 rounded text-slate-400 border border-surface-elevated">
+                      <h4 className="font-mono text-xs font-bold text-text truncate">{opp.title || "Historical Opportunity"}</h4>
+                      <span className="text-[9px] font-bold uppercase tracking-wider bg-surface px-2 py-0.5 rounded text-text-muted border border-border">
                         {opp.relevance}
                       </span>
                     </div>
                     <div className="flex justify-between items-center text-xs font-mono">
-                      <span className="text-slate-400">{opp.company || "Protected Entity"}</span>
+                      <span className="text-text-muted">{opp.company || "Protected Entity"}</span>
                       <span className={
                         opp.risk_level === 'CRITICAL' || opp.risk_level === 'HIGH' 
                           ? 'badge badge-critical' 
@@ -692,7 +692,7 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
                       </span>
                     </div>
                     {opp.summary && (
-                      <p className="mt-2 text-[11px] font-mono text-slate-400 leading-relaxed bg-surface/50 p-2 rounded">
+                      <p className="mt-2 text-[11px] font-mono text-text-muted leading-relaxed bg-surface/50 p-2 rounded">
                         {opp.summary}
                       </p>
                     )}
@@ -704,7 +704,7 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
         )}
         
         {/* Report Component */}
-        <div className="pt-4 border-t border-surface-elevated mt-8">
+        <div className="pt-4 border-t border-border mt-8">
           <ReportOpportunityForm 
             jobId={result.id} 
             companyId={result.company?.id} 

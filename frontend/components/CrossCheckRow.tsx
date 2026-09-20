@@ -24,7 +24,7 @@ export default function CrossCheckRow({ item, index }: CrossCheckRowProps) {
       whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true, margin: '-40px' }}
       transition={{ duration: 0.42, delay, ease: 'easeOut' }}
-      className="flex items-center justify-between py-2.5 px-3 bg-surface border border-surface-elevated rounded-sm text-xs font-mono"
+      className="flex items-center justify-between py-2.5 px-3 bg-surface border border-border rounded-sm text-xs font-mono"
     >
       <div className="flex items-center gap-2.5">
         {/* Activating dot */}
@@ -45,7 +45,7 @@ export default function CrossCheckRow({ item, index }: CrossCheckRowProps) {
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: delay + 0.25, ease: 'easeOut' }}
         />
-        <span className="text-slate-400 uppercase tracking-wider">{item.label}</span>
+        <span className="text-text-muted uppercase tracking-wider">{item.label}</span>
       </div>
       <motion.span
         className={`${item.color} font-bold`}
